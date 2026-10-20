@@ -12,9 +12,7 @@ it('redirects guests to the sign-in page', function () {
 });
 
 it('blocks guests from every protected page', function () {
-    $this->get('/calendar')->assertRedirect(route('signin'));
-    $this->get('/blank')->assertRedirect(route('signin'));
-    $this->get('/line-chart')->assertRedirect(route('signin'));
+    $this->get('/profile')->assertRedirect(route('signin'));
 });
 
 it('shows the sign-in page to guests', function () {
