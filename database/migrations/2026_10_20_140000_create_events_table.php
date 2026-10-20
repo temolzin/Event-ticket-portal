@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('venue');
             $table->dateTime('starts_at');
             $table->unsignedInteger('capacity');
-            $table->decimal('price', 10, 2);
+            $table->unsignedInteger('early_quantity')->default(30);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

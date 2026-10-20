@@ -14,7 +14,7 @@ class EventFactory extends Factory
             'venue' => fake()->city().' Convention Center',
             'starts_at' => fake()->dateTimeBetween('+1 week', '+3 months'),
             'capacity' => fake()->numberBetween(50, 500),
-            'price' => fake()->randomFloat(2, 10, 500),
+            'early_quantity' => 30,
             'is_active' => true,
         ];
     }

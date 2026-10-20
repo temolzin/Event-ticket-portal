@@ -14,6 +14,7 @@ class Ticket extends Model
 
     protected $fillable = [
         'event_id',
+        'ticket_type_id',
         'seller_id',
         'buyer_name',
         'buyer_email',
@@ -21,6 +22,7 @@ class Ticket extends Model
         'payment_receipt_path',
         'code',
         'status',
+        'price',
         'sent_at',
         'checked_in_at',
     ];
@@ -29,6 +31,7 @@ class Ticket extends Model
     {
         return [
             'status' => TicketStatus::class,
+            'price' => 'decimal:2',
             'sent_at' => 'datetime',
             'checked_in_at' => 'datetime',
         ];
@@ -37,6 +40,11 @@ class Ticket extends Model
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function ticketType(): BelongsTo
+    {
+        return $this->belongsTo(TicketType::class);
     }
 
     public function seller(): BelongsTo
