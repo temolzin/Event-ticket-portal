@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TicketStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -55,5 +56,30 @@ class Ticket extends Model
     public function scans(): HasMany
     {
         return $this->hasMany(Scan::class);
+    }
+
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->whereNot('status', TicketStatus::Cancelled);
+    }
+
+    public function scopeCancelled(Builder $query): Builder
+    {
+        return $query->where('status', TicketStatus::Cancelled);
+    }
+
+    public function scopeSoldBy(Builder $query, int $sellerId): Builder
+    {
+        return $query->where('seller_id', $sellerId);
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === TicketStatus::Cancelled;
+    }
+
+    public function wasUsed(): bool
+    {
+        return $this->checked_in_at !== null;
     }
 }

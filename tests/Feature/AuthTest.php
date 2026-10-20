@@ -7,12 +7,30 @@ use Illuminate\Support\Facades\Route;
 
 uses(RefreshDatabase::class);
 
+function adminUser(): User
+{
+    return User::factory()->create(['role' => UserRole::Admin]);
+}
+
+function sellerUser(): User
+{
+    return User::factory()->create(['role' => UserRole::Seller]);
+}
+
+function managerUser(): User
+{
+    return User::factory()->create(['role' => UserRole::Manager]);
+}
+
 it('redirects guests to the sign-in page', function () {
     $this->get('/')->assertRedirect(route('signin'));
 });
 
 it('blocks guests from every protected page', function () {
-    $this->get('/profile')->assertRedirect(route('signin'));
+    $this->get('/events')->assertRedirect(route('signin'));
+    $this->get('/tickets')->assertRedirect(route('signin'));
+    $this->get('/check-in')->assertRedirect(route('signin'));
+    $this->get('/users')->assertRedirect(route('signin'));
 });
 
 it('shows the sign-in page to guests', function () {
