@@ -39,6 +39,11 @@ class Event extends Model
         return $this->hasMany(TicketType::class);
     }
 
+    public function activeTicketTypes(): HasMany
+    {
+        return $this->ticketTypes()->where('is_active', true);
+    }
+
     public function activeTickets(): HasMany
     {
         return $this->tickets()->whereNot('status', TicketStatus::Cancelled);
