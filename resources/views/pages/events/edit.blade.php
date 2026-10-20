@@ -1,7 +1,7 @@
 ﻿@extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb pageTitle="{{ __('Editar evento') }}" />
+    <x-common.page-breadcrumb pageTitle="Editar evento" />
 
     <x-common.flash />
 
@@ -9,6 +9,6 @@
         @csrf
         @method('PUT')
 
-        @include('pages.events._form', ['submitLabel' => __('Actualizar evento')])
+        @include('pages.events._form', ['submitLabel' => 'Actualizar evento'])
     </form>
 @endsection

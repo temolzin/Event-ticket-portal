@@ -11,12 +11,12 @@ class TicketPricesSeeder extends Seeder
     public function run(): void
     {
         $event = Event::query()->firstOrCreate(
-            ['name' => 'Fiesta Aniversario UTTEC'],
+            ['name' => 'Nexus Tech'],
             [
-                'description' => 'Evento interno de la comunidad UTTEC.',
-                'venue' => 'Instalaciones UTTEC',
+                'description' => 'Evento interno de Nexus Tech.',
+                'venue' => 'Instalaciones Nexus Tech',
                 'starts_at' => now()->addMonth(),
-                'capacity' => 500,
+                'capacity' => 100,
                 'early_quantity' => 30,
                 'is_active' => true,
             ]

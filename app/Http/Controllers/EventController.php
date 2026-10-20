@@ -18,21 +18,21 @@ class EventController extends Controller
             ->orderByDesc('starts_at')
             ->paginate(15);
 
-        return view('pages.events.index', ['title' => __('Eventos'), 'events' => $events]);
+        return view('pages.events.index', ['title' => 'Eventos', 'events' => $events]);
     }
 
     public function create(): View
     {
         $this->authorize('create', Event::class);
 
-        return view('pages.events.create', ['title' => __('Nuevo evento')]);
+        return view('pages.events.create', ['title' => 'Nuevo evento']);
     }
 
     public function store(StoreEventRequest $request): RedirectResponse
     {
         Event::create($request->eventAttributes());
 
-        return to_route('events.index')->with('status', __('Evento creado correctamente.'));
+        return to_route('events.index')->with('status', 'Evento creado correctamente.');
     }
 
     public function show(Event $event): View
@@ -41,14 +41,14 @@ class EventController extends Controller
 
         $event->loadCount(['tickets as sold_seats_count' => fn ($query) => $query->active()]);
 
-        return view('pages.events.show', ['title' => __('Detalle del evento'), 'event' => $event]);
+        return view('pages.events.show', ['title' => 'Detalle del evento', 'event' => $event]);
     }
 
     public function edit(Event $event): View
     {
         $this->authorize('update', $event);
 
-        return view('pages.events.edit', ['title' => __('Editar evento'), 'event' => $event]);
+        return view('pages.events.edit', ['title' => 'Editar evento', 'event' => $event]);
     }
 
     public function update(StoreEventRequest $request, Event $event): RedirectResponse
@@ -57,7 +57,7 @@ class EventController extends Controller
 
         $event->update($request->eventAttributes());
 
-        return to_route('events.show', $event)->with('status', __('Evento actualizado correctamente.'));
+        return to_route('events.show', $event)->with('status', 'Evento actualizado correctamente.');
     }
 
     public function destroy(Event $event): RedirectResponse
@@ -66,6 +66,6 @@ class EventController extends Controller
 
         $event->delete();
 
-        return to_route('events.index')->with('status', __('Evento eliminado correctamente.'));
+        return to_route('events.index')->with('status', 'Evento eliminado correctamente.');
     }
 }
