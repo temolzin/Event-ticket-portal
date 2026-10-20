@@ -2,38 +2,70 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreEventRequest;
+use App\Models\Event;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
-class EventController
+class EventController extends Controller
 {
     public function index(): View
     {
-        return view('pages.events.index', ['title' => 'Eventos']);
+        $this->authorize('viewAny', Event::class);
+
+        $events = Event::query()
+            ->withCount(['tickets as sold_seats_count' => fn ($query) => $query->active()])
+            ->orderByDesc('starts_at')
+            ->paginate(15);
+
+        return view('pages.events.index', ['title' => __('Eventos'), 'events' => $events]);
     }
 
     public function create(): View
     {
-        return view('pages.events.create', ['title' => 'Nuevo evento']);
+        $this->authorize('create', Event::class);
+
+        return view('pages.events.create', ['title' => __('Nuevo evento')]);
     }
 
-    public function show(int $event): View
+    public function store(StoreEventRequest $request): RedirectResponse
     {
-        return view('pages.events.show', ['title' => 'Detalle del evento', 'event' => $event]);
+        Event::create($request->eventAttributes());
+
+        return to_route('events.index')->with('status', __('Evento creado correctamente.'));
     }
 
-    public function edit(int $event): View
+    public function show(Event $event): View
     {
-        return view('pages.events.edit', ['title' => 'Editar evento', 'event' => $event]);
+        $this->authorize('view', $event);
+
+        $event->loadCount(['tickets as sold_seats_count' => fn ($query) => $query->active()]);
+
+        return view('pages.events.show', ['title' => __('Detalle del evento'), 'event' => $event]);
     }
 
-    public function store(): RedirectResponse
+    public function edit(Event $event): View
     {
-        return to_route('events.index');
+        $this->authorize('update', $event);
+
+        return view('pages.events.edit', ['title' => __('Editar evento'), 'event' => $event]);
     }
 
-    public function update(int $event): RedirectResponse
+    public function update(StoreEventRequest $request, Event $event): RedirectResponse
     {
-        return to_route('events.show', $event);
+        $this->authorize('update', $event);
+
+        $event->update($request->eventAttributes());
+
+        return to_route('events.show', $event)->with('status', __('Evento actualizado correctamente.'));
+    }
+
+    public function destroy(Event $event): RedirectResponse
+    {
+        $this->authorize('delete', $event);
+
+        $event->delete();
+
+        return to_route('events.index')->with('status', __('Evento eliminado correctamente.'));
     }
 }

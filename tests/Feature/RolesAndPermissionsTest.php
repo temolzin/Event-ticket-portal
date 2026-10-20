@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\UserRole;
+use App\Models\Event;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -26,11 +27,13 @@ it('lets every role reach the dashboard', function (UserRole $role) {
 ]);
 
 it('lets only the admin manage events', function () {
+    $event = Event::factory()->create();
+
     actingRole(UserRole::Admin);
     $this->get('/events')->assertOk();
     $this->get('/events/create')->assertOk();
-    $this->get('/events/1')->assertOk();
-    $this->get('/events/1/edit')->assertOk();
+    $this->get("/events/{$event->id}")->assertOk();
+    $this->get("/events/{$event->id}/edit")->assertOk();
 
     actingRole(UserRole::Seller);
     $this->get('/events')->assertForbidden();

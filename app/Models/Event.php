@@ -63,4 +63,14 @@ class Event extends Model
     {
         return $this->countAvailableSeats() > 0;
     }
+
+    public function hasEnded(): bool
+    {
+        return $this->starts_at->copy()->addDays(2)->startOfDay()->isPast();
+    }
+
+    public function canBeDeleted(): bool
+    {
+        return $this->hasEnded();
+    }
 }

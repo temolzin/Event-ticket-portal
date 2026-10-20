@@ -29,6 +29,6 @@ class EventPolicy
 
     public function delete(User $user, Event $event): bool
     {
-        return false;
+        return $user->isAdmin() && $event->canBeDeleted();
     }
 }
