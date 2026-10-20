@@ -87,9 +87,34 @@
             </div>
 
             <x-common.component-card title="Tipos de boleto">
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Los precios del evento se administran desde la pantalla de precios.
-                </p>
+                <div class="space-y-3">
+                    @forelse($event->ticketTypes as $ticketType)
+                        <div class="flex items-center justify-between gap-3 border-b border-gray-100 pb-3 last:border-0 last:pb-0 dark:border-gray-800">
+                            <div>
+                                <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ $ticketType->name }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    Preventa
+                                    {{ $ticketType->early_price ? '$' . number_format((float) $ticketType->early_price, 2) : '—' }}
+                                    · Normal ${{ number_format((float) $ticketType->regular_price, 2) }}
+                                </p>
+                            </div>
+                            <x-ui.badge :color="$ticketType->is_active ? 'success' : 'light'" size="sm">
+                                {{ $ticketType->is_active ? 'Activo' : 'Inactivo' }}
+                            </x-ui.badge>
+                        </div>
+                    @empty
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Este evento todavía no tiene boletos registrados.
+                        </p>
+                    @endforelse
+
+                    <a
+                        href="{{ route('events.prices', $event) }}"
+                        class="mt-2 inline-flex w-full items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+                    >
+                        Administrar precios
+                    </a>
+                </div>
             </x-common.component-card>
         </div>
     </div>

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Event;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 
 class StoreEventRequest extends FormRequest
 {
@@ -22,6 +23,10 @@ class StoreEventRequest extends FormRequest
             'capacity' => ['required', 'integer', 'min:1', 'max:100000'],
             'early_quantity' => ['required', 'integer', 'min:0', 'max:100000', 'lte:capacity'],
             'is_active' => ['boolean'],
+            'ticket_types' => ['nullable', 'array'],
+            'ticket_types.*.name' => ['required', 'string', 'max:255'],
+            'ticket_types.*.early_price' => ['nullable', 'numeric', 'min:0', 'max:999999'],
+            'ticket_types.*.regular_price' => ['required', 'numeric', 'min:0', 'max:999999'],
         ];
     }
 
@@ -43,6 +48,16 @@ class StoreEventRequest extends FormRequest
             'early_quantity.min' => 'La cantidad de preventa no puede ser negativa.',
             'early_quantity.lte' => 'La cantidad de preventa no puede pasar de la capacidad.',
             'is_active.boolean' => 'El estado del evento no es válido.',
+            'ticket_types.array' => 'Los precios de los boletos no son válidos.',
+            'ticket_types.*.name.required' => 'Escribe el nombre del boleto.',
+            'ticket_types.*.name.max' => 'El nombre del boleto no puede pasar de 255 caracteres.',
+            'ticket_types.*.early_price.numeric' => 'El precio de preventa debe ser un número.',
+            'ticket_types.*.early_price.min' => 'El precio de preventa no puede ser negativo.',
+            'ticket_types.*.early_price.max' => 'El precio de preventa es demasiado grande.',
+            'ticket_types.*.regular_price.required' => 'Escribe el precio normal del boleto.',
+            'ticket_types.*.regular_price.numeric' => 'El precio normal debe ser un número.',
+            'ticket_types.*.regular_price.min' => 'El precio normal no puede ser negativo.',
+            'ticket_types.*.regular_price.max' => 'El precio normal es demasiado grande.',
         ];
     }
 
@@ -57,6 +72,21 @@ class StoreEventRequest extends FormRequest
             'early_quantity',
             'is_active',
         ]);
+    }
+
+    public function ticketTypeAttributes(): array
+    {
+        return collect($this->validated()['ticket_types'] ?? [])
+            ->map(fn (array $type) => [
+                'key' => Str::limit(Str::slug($type['name']), 30, ''),
+                'name' => $type['name'],
+                'early_price' => $type['early_price'] ?? null,
+                'regular_price' => $type['regular_price'],
+                'is_active' => true,
+            ])
+            ->unique('key')
+            ->values()
+            ->all();
     }
 
     protected function prepareForValidation(): void

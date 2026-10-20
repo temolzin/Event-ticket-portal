@@ -5,6 +5,7 @@ use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\TicketTypeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,8 +39,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
         Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
         Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
-        Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
-        Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
+
+        Route::get('/events/{event}/prices', [TicketTypeController::class, 'index'])->name('events.prices');
+        Route::post('/ticket-types', [TicketTypeController::class, 'store'])->name('ticket-types.store');
+        Route::patch('/events/{event}/prices/{ticketType}', [TicketTypeController::class, 'toggle'])
+            ->name('ticket-types.toggle');
+        Route::delete('/events/{event}/prices/{ticketType}', [TicketTypeController::class, 'destroy'])
+            ->name('ticket-types.destroy');
 
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create');

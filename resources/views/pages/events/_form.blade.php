@@ -1,5 +1,6 @@
 @php
     $event = $event ?? null;
+    $ticketRows = $ticketRows ?? [['name' => '', 'early_price' => '', 'regular_price' => '']];
 @endphp
 
 <div class="space-y-6">
@@ -67,6 +68,113 @@
             >{{ old('description', $event?->description) }}</textarea>
             @error('description')
                 <p class="mt-1.5 text-xs text-error-500">{{ $message }}</p>
+            @enderror
+        </div>
+    </x-common.component-card>
+
+    <x-common.component-card title="Precios de los boletos">
+        @if($event)
+            <div class="mb-5 space-y-3">
+                @forelse($event->ticketTypes as $ticketType)
+                    <div class="flex items-center justify-between gap-3 border-b border-gray-100 pb-3 last:border-0 last:pb-0 dark:border-gray-800">
+                        <div>
+                            <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ $ticketType->name }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                Preventa
+                                {{ $ticketType->early_price ? '$' . number_format((float) $ticketType->early_price, 2) : '—' }}
+                                · Normal ${{ number_format((float) $ticketType->regular_price, 2) }}
+                            </p>
+                        </div>
+                        <x-ui.badge :color="$ticketType->is_active ? 'success' : 'light'" size="sm">
+                            {{ $ticketType->is_active ? 'Activo' : 'Inactivo' }}
+                        </x-ui.badge>
+                    </div>
+                @empty
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Este evento todavía no tiene boletos registrados.
+                    </p>
+                @endforelse
+            </div>
+        @endif
+
+        <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+            Agrega aquí los boletos nuevos. Para editar o eliminar los existentes usa
+            @if($event)
+                <a href="{{ route('events.prices', $event) }}" class="text-brand-500 hover:underline">la pantalla de precios</a>.
+            @else
+                la pantalla de precios del evento.
+            @endif
+        </p>
+
+        <div
+            x-data="{
+                rows: @js($ticketRows),
+                addRow() {
+                    this.rows.push({ name: '', early_price: '', regular_price: '' });
+                },
+                removeRow(index) {
+                    this.rows.splice(index, 1);
+                },
+            }"
+            class="space-y-4"
+        >
+            <template x-for="(row, index) in rows" :key="index">
+                <div class="grid grid-cols-1 gap-3 rounded-lg border border-gray-200 p-4 sm:grid-cols-12 dark:border-gray-800">
+                    <div class="sm:col-span-5">
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Nombre del boleto</label>
+                        <input
+                            type="text"
+                            :name="`ticket_types[${index}][name]`"
+                            x-model="row.name"
+                            placeholder="Ej. Boleto individual"
+                            class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+                        >
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Preventa</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            :name="`ticket_types[${index}][early_price]`"
+                            x-model="row.early_price"
+                            class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+                        >
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Normal</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            :name="`ticket_types[${index}][regular_price]`"
+                            x-model="row.regular_price"
+                            class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+                        >
+                    </div>
+                    <div class="flex items-end sm:col-span-1">
+                        <button
+                            type="button"
+                            @click="removeRow(index)"
+                            title="Quitar"
+                            class="inline-flex h-11 w-full items-center justify-center rounded-lg bg-error-50 text-error-500 transition hover:bg-error-100 dark:bg-error-500/15"
+                        >
+                            &times;
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <button
+                type="button"
+                @click="addRow()"
+                class="inline-flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-white/5"
+            >
+                + Agregar boleto
+            </button>
+
+            @error('ticket_types')
+                <p class="text-xs text-error-500">{{ $message }}</p>
             @enderror
         </div>
     </x-common.component-card>

@@ -38,4 +38,14 @@ class TicketType extends Model
     {
         return $this->hasMany(Ticket::class);
     }
+
+    public function hasSales(): bool
+    {
+        return $this->tickets()->exists();
+    }
+
+    public function canBeDeleted(): bool
+    {
+        return ! $this->hasSales();
+    }
 }
