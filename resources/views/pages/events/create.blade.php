@@ -3,5 +3,11 @@
 @section('content')
     <x-common.page-breadcrumb pageTitle="{{ __('Nuevo evento') }}" />
 
-    <x-common.placeholder-panel title="{{ __('Nuevo evento') }}" description="{{ __('Aquí se capturarán nombre, descripción, lugar, fecha, capacidad y precios.') }}" />
+    <x-common.flash />
+
+    <form method="POST" action="{{ route('events.store') }}">
+        @csrf
+
+        @include('pages.events._form', ['submitLabel' => __('Guardar evento')])
+    </form>
 @endsection
