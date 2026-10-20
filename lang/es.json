@@ -1,0 +1,19 @@
+{
+    "Sign In": "Iniciar sesión",
+    "Enter your email and password to sign in!": "Ingresa tu correo y contraseña para iniciar sesión.",
+    "Email": "Correo electrónico",
+    "Password": "Contraseña",
+    "Enter your password": "Ingresa tu contraseña",
+    "Keep me logged in": "Mantener sesión iniciada",
+    "Staff access only. Contact your administrator to get an account.": "Acceso exclusivo del personal. Contacta a tu administrador para obtener una cuenta.",
+    "Free and Open-Source Tailwind CSS Admin Dashboard Template": "Plantilla de administración gratuita y open-source con Tailwind CSS",
+    "Edit profile": "Editar perfil",
+    "Account settings": "Configuración de cuenta",
+    "Support": "Soporte",
+    "Language": "Idioma",
+    "Sign out": "Cerrar sesión",
+    "auth.failed": "Las credenciales no coinciden con nuestros registros.",
+    "validation.email_required": "El correo es obligatorio.",
+    "validation.email_invalid": "Introduce un correo electrónico válido.",
+    "validation.password_required": "La contraseña es obligatoria."
+}

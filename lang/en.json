@@ -1,0 +1,19 @@
+{
+    "Sign In": "Sign In",
+    "Enter your email and password to sign in!": "Enter your email and password to sign in!",
+    "Email": "Email",
+    "Password": "Password",
+    "Enter your password": "Enter your password",
+    "Keep me logged in": "Keep me logged in",
+    "Staff access only. Contact your administrator to get an account.": "Staff access only. Contact your administrator to get an account.",
+    "Free and Open-Source Tailwind CSS Admin Dashboard Template": "Free and Open-Source Tailwind CSS Admin Dashboard Template",
+    "Edit profile": "Edit profile",
+    "Account settings": "Account settings",
+    "Support": "Support",
+    "Language": "Language",
+    "Sign out": "Sign out",
+    "auth.failed": "These credentials do not match our records.",
+    "validation.email_required": "The email field is required.",
+    "validation.email_invalid": "Enter a valid email address.",
+    "validation.password_required": "The password field is required."
+}
