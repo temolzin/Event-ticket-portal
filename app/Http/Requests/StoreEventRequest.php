@@ -28,21 +28,21 @@ class StoreEventRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => __('Escribe el nombre del evento.'),
-            'name.max' => __('El nombre no puede pasar de 255 caracteres.'),
-            'description.max' => __('La descripción no puede pasar de 2000 caracteres.'),
-            'venue.required' => __('Escribe el lugar del evento.'),
-            'starts_at.required' => __('Selecciona la fecha del evento.'),
-            'starts_at.date' => __('La fecha del evento no es válida.'),
-            'capacity.required' => __('Escribe la capacidad del evento.'),
-            'capacity.integer' => __('La capacidad debe ser un número entero.'),
-            'capacity.min' => __('La capacidad debe ser al menos 1.'),
-            'capacity.max' => __('La capacidad es demasiado grande.'),
-            'early_quantity.required' => __('Escribe la cantidad de boletos con precio de preventa.'),
-            'early_quantity.integer' => __('La cantidad de preventa debe ser un número entero.'),
-            'early_quantity.min' => __('La cantidad de preventa no puede ser negativa.'),
-            'early_quantity.lte' => __('La cantidad de preventa no puede pasar de la capacidad.'),
-            'is_active.boolean' => __('El estado del evento no es válido.'),
+            'name.required' => 'Escribe el nombre del evento.',
+            'name.max' => 'El nombre no puede pasar de 255 caracteres.',
+            'description.max' => 'La descripción no puede pasar de 2000 caracteres.',
+            'venue.required' => 'Escribe el lugar del evento.',
+            'starts_at.required' => 'Selecciona la fecha del evento.',
+            'starts_at.date' => 'La fecha del evento no es válida.',
+            'capacity.required' => 'Escribe la capacidad del evento.',
+            'capacity.integer' => 'La capacidad debe ser un número entero.',
+            'capacity.min' => 'La capacidad debe ser al menos 1.',
+            'capacity.max' => 'La capacidad es demasiado grande.',
+            'early_quantity.required' => 'Escribe la cantidad de boletos con precio de preventa.',
+            'early_quantity.integer' => 'La cantidad de preventa debe ser un número entero.',
+            'early_quantity.min' => 'La cantidad de preventa no puede ser negativa.',
+            'early_quantity.lte' => 'La cantidad de preventa no puede pasar de la capacidad.',
+            'is_active.boolean' => 'El estado del evento no es válido.',
         ];
     }
 
