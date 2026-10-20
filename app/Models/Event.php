@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TicketStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,7 +17,7 @@ class Event extends Model
         'venue',
         'starts_at',
         'capacity',
-        'price',
+        'early_quantity',
         'is_active',
     ];
 
@@ -24,7 +25,6 @@ class Event extends Model
     {
         return [
             'starts_at' => 'datetime',
-            'price' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }
@@ -37,5 +37,30 @@ class Event extends Model
     public function ticketTypes(): HasMany
     {
         return $this->hasMany(TicketType::class);
+    }
+
+    public function activeTickets(): HasMany
+    {
+        return $this->tickets()->whereNot('status', TicketStatus::Cancelled);
+    }
+
+    public function cancelledTickets(): HasMany
+    {
+        return $this->tickets()->where('status', TicketStatus::Cancelled);
+    }
+
+    public function countSoldSeats(): int
+    {
+        return $this->activeTickets()->count();
+    }
+
+    public function countAvailableSeats(): int
+    {
+        return max($this->capacity - $this->countSoldSeats(), 0);
+    }
+
+    public function hasAvailableSeats(): bool
+    {
+        return $this->countAvailableSeats() > 0;
     }
 }

@@ -60,6 +60,16 @@ class User extends Authenticatable
         return $this->role === UserRole::Admin;
     }
 
+    public function isSeller(): bool
+    {
+        return $this->role === UserRole::Seller;
+    }
+
+    public function isManager(): bool
+    {
+        return $this->role === UserRole::Manager;
+    }
+
     public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class, 'seller_id');
