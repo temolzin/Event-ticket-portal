@@ -19,12 +19,9 @@ class TicketController extends Controller
     {
         $this->authorize('viewAny', Ticket::class);
 
-        $tickets = $this->ticketsFor($request)
-            ->with(['event', 'ticketType', 'seller'])
-            ->orderByDesc('id')
-            ->paginate(15);
+        $events = $this->registeredEvents($request);
 
-        return view('pages.tickets.index', ['title' => 'Boletos', 'tickets' => $tickets]);
+        return view('pages.tickets.index', ['title' => 'Clientes', 'events' => $events]);
     }
 
     public function create(): View
@@ -116,13 +113,24 @@ class TicketController extends Controller
         return view('pages.tickets.cancelled', ['title' => 'Boletos cancelados', 'tickets' => $tickets]);
     }
 
-    private function ticketsFor(Request $request)
+    private function registeredEvents(Request $request)
     {
-        return Ticket::query()
-            ->when(
+        return Event::query()
+            ->whereHas('tickets', fn ($query) => $query->when(
                 ! $request->user()->isAdmin(),
-                fn ($query) => $query->soldBy($request->user()->id)
-            );
+                fn ($inner) => $inner->soldBy($request->user()->id)
+            ))
+            ->with([
+                'tickets' => fn ($query) => $query
+                    ->when(
+                        ! $request->user()->isAdmin(),
+                        fn ($inner) => $inner->soldBy($request->user()->id)
+                    )
+                    ->with(['ticketType', 'seller'])
+                    ->orderByDesc('id'),
+            ])
+            ->orderByDesc('starts_at')
+            ->get();
     }
 
     private function sellableEvents()

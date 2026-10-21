@@ -1,7 +1,7 @@
 ﻿@extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb pageTitle="Boletos cancelados" />
+    <x-common.page-breadcrumb pageTitle="Clientes cancelados" />
 
     <x-common.flash />
 

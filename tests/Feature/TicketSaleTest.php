@@ -214,6 +214,55 @@ it('shows every sale to the admin', function () {
         ->assertSee('Compra Del Vendedor');
 });
 
+it('groups the clients by event', function () {
+    $seller = saleSeller();
+    $firstEvent = Event::factory()->create(['name' => 'Evento Uno']);
+    $secondEvent = Event::factory()->create(['name' => 'Evento Dos']);
+
+    Ticket::factory()->create([
+        'event_id' => $firstEvent->id,
+        'seller_id' => $seller->id,
+        'buyer_name' => 'Cliente Del Primero',
+    ]);
+    Ticket::factory()->create([
+        'event_id' => $secondEvent->id,
+        'seller_id' => $seller->id,
+        'buyer_name' => 'Cliente Del Segundo',
+    ]);
+
+    $response = $this->actingAs($seller)->get('/tickets')->assertOk();
+
+    $response->assertSee('Evento Uno')
+        ->assertSee('Evento Dos')
+        ->assertSee('Cliente Del Primero')
+        ->assertSee('Cliente Del Segundo');
+});
+
+it('shows the count of clients per event', function () {
+    $seller = saleSeller();
+    $event = Event::factory()->create(['name' => 'Evento Con Tres']);
+
+    Ticket::factory()->count(3)->create([
+        'event_id' => $event->id,
+        'seller_id' => $seller->id,
+    ]);
+
+    $this->actingAs($seller)
+        ->get('/tickets')
+        ->assertOk()
+        ->assertSee('3 clientes registrados');
+});
+
+it('leaves out an event with no sales', function () {
+    $seller = saleSeller();
+    Event::factory()->create(['name' => 'Evento Sin Ventas']);
+
+    $this->actingAs($seller)
+        ->get('/tickets')
+        ->assertOk()
+        ->assertDontSee('Evento Sin Ventas');
+});
+
 it('keeps the seller out of a sale that belongs to someone else', function () {
     $ticket = Ticket::factory()->create();
 

@@ -1,7 +1,7 @@
 ﻿@extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb pageTitle="Detalle del boleto" />
+    <x-common.page-breadcrumb pageTitle="Detalle del cliente" />
 
     <x-common.flash />
 
