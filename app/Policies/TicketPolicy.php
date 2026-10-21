@@ -35,7 +35,9 @@ class TicketPolicy
 
     public function send(User $user, Ticket $ticket): bool
     {
-        return $user->isAdmin() || $user->id === $ticket->seller_id;
+        return ($user->isAdmin() || $user->id === $ticket->seller_id)
+            && ! $ticket->isCancelled()
+            && ! $ticket->wasUsed();
     }
 
     public function cancel(User $user, Ticket $ticket): bool

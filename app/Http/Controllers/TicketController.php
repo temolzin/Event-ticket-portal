@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTicketRequest;
 use App\Enums\TicketStatus;
+use App\Mail\TicketMail;
 use App\Models\Event;
 use App\Models\Ticket;
 use App\Models\TicketType;
@@ -11,8 +12,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Throwable;
 
 class TicketController extends Controller
 {
@@ -81,7 +84,20 @@ class TicketController extends Controller
     {
         $this->authorize('send', $ticket);
 
-        return to_route('tickets.show', $ticket);
+        try {
+            Mail::to($ticket->buyer_email)->send(new TicketMail($ticket));
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return to_route('tickets.show', $ticket)->withErrors([
+                'correo' => 'No se pudo enviar el correo. Revisa la configuración del servidor de correo.',
+            ]);
+        }
+
+        $ticket->update(['status' => TicketStatus::Sent, 'sent_at' => now()]);
+
+        return to_route('tickets.show', $ticket)
+            ->with('status', 'Boleto enviado a '.$ticket->buyer_email.'.');
     }
 
     public function download(Ticket $ticket): View
