@@ -72,12 +72,20 @@ class StoreTicketRequest extends FormRequest
     public function withValidator(\Illuminate\Validation\Validator $validator): void
     {
         $validator->after(function ($validator) {
-            $event = $this->event();
+            $event = Event::query()
+                ->whereKey($this->integer('event_id'))
+                ->where('is_active', true)
+                ->first();
+            $ticketType = TicketType::query()
+                ->whereKey($this->integer('ticket_type_id'))
+                ->where('event_id', $this->integer('event_id'))
+                ->where('is_active', true)
+                ->first();
 
             $validator->errors()->addIf(
-                ! $event->hasAvailableSeats(),
+                $event && $ticketType && ! $event->hasAvailableSeats($ticketType->seats_per_ticket),
                 'event_id',
-                'Este evento ya no tiene lugares disponibles.'
+                'Este evento no tiene suficientes lugares disponibles para ese boleto.'
             );
         });
     }

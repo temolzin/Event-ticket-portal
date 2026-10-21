@@ -36,6 +36,8 @@
     "Register a sale": "Registrar una venta",
     "Open check-in": "Abrir check-in",
     "Event occupancy": "Ocupación del evento",
+    "Occupied seats": "Lugares ocupados",
+    "Seats per ticket": "Lugares por boleto",
     "Tickets checked in": "Boletos con check-in",
     "Sales, remaining capacity, and check-in progress for upcoming events.": "Ventas, lugares disponibles y progreso de check-in de próximos eventos.",
     ":count event|:count events": ":count evento|:count eventos",

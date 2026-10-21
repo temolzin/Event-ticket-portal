@@ -33,6 +33,8 @@
     "Register a sale": "Register a sale",
     "Open check-in": "Open check-in",
     "Event occupancy": "Event occupancy",
+    "Occupied seats": "Occupied seats",
+    "Seats per ticket": "Seats per ticket",
     "Tickets checked in": "Tickets checked in",
     "Sales, remaining capacity, and check-in progress for upcoming events.": "Sales, remaining capacity, and check-in progress for upcoming events.",
     ":count event|:count events": ":count event|:count events",

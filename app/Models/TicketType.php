@@ -15,6 +15,7 @@ class TicketType extends Model
         'event_id',
         'key',
         'name',
+        'seats_per_ticket',
         'early_price',
         'regular_price',
         'is_active',
@@ -25,6 +26,7 @@ class TicketType extends Model
         return [
             'early_price' => 'decimal:2',
             'regular_price' => 'decimal:2',
+            'seats_per_ticket' => 'integer',
             'is_active' => 'boolean',
         ];
     }

@@ -45,7 +45,7 @@
             <x-common.component-card title="Lugares">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="rounded-xl bg-gray-50 p-4 text-center dark:bg-white/5">
-                        <p class="text-2xl font-semibold text-gray-800 dark:text-white/90">{{ $event->sold_seats_count }}</p>
+                        <p class="text-2xl font-semibold text-gray-800 dark:text-white/90">{{ $event->countSoldSeats() }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">Vendidos</p>
                     </div>
                     <div class="rounded-xl bg-gray-50 p-4 text-center dark:bg-white/5">

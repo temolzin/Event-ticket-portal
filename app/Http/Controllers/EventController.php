@@ -16,7 +16,6 @@ class EventController extends Controller
         $this->authorize('viewAny', Event::class);
 
         $events = Event::query()
-            ->withCount(['tickets as sold_seats_count' => fn ($query) => $query->active()])
             ->orderByDesc('starts_at')
             ->paginate(15);
 
@@ -50,7 +49,6 @@ class EventController extends Controller
     {
         $this->authorize('view', $event);
 
-        $event->loadCount(['tickets as sold_seats_count' => fn ($query) => $query->active()]);
         $event->load('ticketTypes');
 
         return view('pages.events.show', ['title' => 'Detalle del evento', 'event' => $event]);
@@ -98,7 +96,7 @@ class EventController extends Controller
     private function emptyTicketRows(): array
     {
         return [
-            ['name' => '', 'early_price' => '', 'regular_price' => ''],
+            ['name' => '', 'seats_per_ticket' => 1, 'early_price' => '', 'regular_price' => ''],
         ];
     }
 }

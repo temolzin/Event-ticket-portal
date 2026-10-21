@@ -117,6 +117,16 @@
                     />
 
                     <x-form.input
+                        name="seats_per_ticket"
+                        type="number"
+                        min="1"
+                        max="1000"
+                        label="{{ __('Seats per ticket') }}"
+                        :value="old('seats_per_ticket', 1)"
+                        required
+                    />
+
+                    <x-form.input
                         name="early_price"
                         type="number"
                         step="0.01"

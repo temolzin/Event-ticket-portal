@@ -38,7 +38,8 @@ it('adds a ticket type from the prices screen', function () {
     $this->actingAs(ticketTypeAdmin())
         ->post('/ticket-types', [
             'event_id' => $event->id,
-            'name' => 'Boleto individual',
+            'name' => 'Boleto dupla',
+            'seats_per_ticket' => 2,
             'early_price' => 990,
             'regular_price' => 1500,
             'is_active' => '1',
@@ -47,8 +48,9 @@ it('adds a ticket type from the prices screen', function () {
 
     $type = TicketType::query()->where('event_id', $event->id)->firstOrFail();
 
-    expect($type->name)->toBe('Boleto individual')
-        ->and($type->key)->toBe('boleto-individual')
+    expect($type->name)->toBe('Boleto dupla')
+        ->and($type->seats_per_ticket)->toBe(2)
+        ->and($type->key)->toBe('boleto-dupla')
         ->and((float) $type->early_price)->toBe(990.0)
         ->and((float) $type->regular_price)->toBe(1500.0)
         ->and($type->is_active)->toBeTrue();
@@ -155,7 +157,7 @@ it('creates an event together with its ticket prices', function () {
             'is_active' => '1',
             'ticket_types' => [
                 ['name' => 'Boleto individual', 'early_price' => 990, 'regular_price' => 1500],
-                ['name' => 'Boleto dupla', 'early_price' => 1800, 'regular_price' => 2600],
+                ['name' => 'Boleto dupla', 'seats_per_ticket' => 2, 'early_price' => 1800, 'regular_price' => 2600],
             ],
         ])
         ->assertRedirect(route('events.index'));
@@ -164,7 +166,8 @@ it('creates an event together with its ticket prices', function () {
 
     expect($event->ticketTypes)->toHaveCount(2)
         ->and($event->ticketTypes->pluck('key')->sort()->values()->all())
-        ->toBe(['boleto-dupla', 'boleto-individual']);
+        ->toBe(['boleto-dupla', 'boleto-individual'])
+        ->and($event->ticketTypes->firstWhere('key', 'boleto-dupla')->seats_per_ticket)->toBe(2);
 });
 
 it('adds ticket prices when updating an event', function () {

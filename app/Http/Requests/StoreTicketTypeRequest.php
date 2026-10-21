@@ -18,6 +18,7 @@ class StoreTicketTypeRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'seats_per_ticket' => ['sometimes', 'integer', 'min:1', 'max:1000'],
             'early_price' => ['nullable', 'numeric', 'min:0', 'max:999999'],
             'regular_price' => ['required', 'numeric', 'min:0', 'max:999999'],
             'event_id' => [
@@ -40,6 +41,9 @@ class StoreTicketTypeRequest extends FormRequest
         return [
             'name.required' => 'Escribe el nombre del boleto.',
             'name.max' => 'El nombre no puede pasar de 255 caracteres.',
+            'seats_per_ticket.integer' => 'Los lugares por boleto deben ser un número entero.',
+            'seats_per_ticket.min' => 'Cada boleto debe ocupar al menos un lugar.',
+            'seats_per_ticket.max' => 'La cantidad de lugares por boleto es demasiado grande.',
             'early_price.numeric' => 'El precio de preventa debe ser un número.',
             'early_price.min' => 'El precio de preventa no puede ser negativo.',
             'early_price.max' => 'El precio de preventa es demasiado grande.',
@@ -59,6 +63,7 @@ class StoreTicketTypeRequest extends FormRequest
             'event_id' => $this->integer('event_id'),
             'key' => $this->resolveKey(),
             'name' => $this->string('name')->trim()->value(),
+            'seats_per_ticket' => $this->integer('seats_per_ticket', 1),
             'early_price' => $this->filled('early_price') ? $this->input('early_price') : null,
             'regular_price' => $this->input('regular_price'),
             'is_active' => $this->boolean('is_active'),
