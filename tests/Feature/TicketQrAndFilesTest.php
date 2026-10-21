@@ -159,8 +159,8 @@ it('sends the ticket by email and marks it as sent', function () {
     Mail::assertSent(TicketMail::class, function (TicketMail $mail) use ($ticket) {
         return $mail->hasTo($ticket->buyer_email)
             && $mail->hasAttachment(
-                Attachment::fromData(fn () => $ticket->qrCode(), 'boleto-'.$ticket->code.'.svg')
-                    ->withMime('image/svg+xml')
+                Attachment::fromData(fn () => $ticket->qrPng(), 'boleto-'.$ticket->code.'.png')
+                    ->withMime('image/png')
             );
     });
 
@@ -228,5 +228,63 @@ it('builds the mail with the buyer data and the event', function () {
     expect($rendered)->toContain($ticket->buyer_name)
         ->and($rendered)->toContain($ticket->event->name)
         ->and($rendered)->toContain($ticket->code)
-        ->and($rendered)->toContain('<svg');
+        ->and($rendered)->toContain('cid:'.TicketMail::QR_CID)
+        ->and($rendered)->not->toContain('<svg');
+});
+
+it('embeds the qr code in the mail with a content id', function () {
+    config(['mail.default' => 'array']);
+
+    $ticket = qrTicket();
+
+    Mail::to('cliente@ejemplo.com')->send(new TicketMail($ticket));
+
+    $email = Mail::mailer('array')->getSymfonyTransport()->messages()[0]->getOriginalMessage();
+
+    $inline = collect($email->getAttachments())->first(
+        fn ($part) => $part->getContentId() === TicketMail::QR_CID
+    );
+
+    expect($inline)->not->toBeNull()
+        ->and($inline->getContentType())->toBe('image/png')
+        ->and($inline->getDisposition())->toBe('inline')
+        ->and($email->getHtmlBody())->toContain('cid:'.TicketMail::QR_CID)
+        ->and($email->toString())->toContain('Content-ID: <'.TicketMail::QR_CID.'>');
+});
+
+it('generates a png qr code that can be scanned', function () {
+    $ticket = qrTicket();
+
+    $png = $ticket->qrPng();
+
+    $info = getimagesizefromstring($png);
+
+    expect($info['mime'])->toBe('image/png')
+        ->and($info[0])->toBeGreaterThan(100)
+        ->and($info[1])->toBeGreaterThan(100);
+});
+
+it('lets the buyer photo download as a file for the badge', function () {
+    $seller = qrSeller();
+    $ticket = qrTicket(seller: $seller);
+
+    $response = $this->actingAs($seller)->get("/tickets/{$ticket->id}/photo/download");
+
+    $response->assertOk();
+
+    expect($response->headers->get('Content-Disposition'))
+        ->toContain('attachment')
+        ->toContain('foto-'.$ticket->code)
+        ->and($response->headers->get('Cache-Control'))->toContain('private');
+});
+
+it('keeps the buyer photo visible inline when it is opened', function () {
+    $seller = qrSeller();
+    $ticket = qrTicket(seller: $seller);
+
+    $response = $this->actingAs($seller)->get("/tickets/{$ticket->id}/photo");
+
+    $response->assertOk();
+
+    expect($response->headers->get('Content-Disposition'))->toContain('inline');
 });

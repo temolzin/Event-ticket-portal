@@ -121,6 +121,11 @@ class Ticket extends Model
         return QrCodeHelper::svg($this->code);
     }
 
+    public function qrPng(): string
+    {
+        return QrCodeHelper::png($this->code);
+    }
+
     public function wasSent(): bool
     {
         return $this->sent_at !== null;

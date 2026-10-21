@@ -67,7 +67,13 @@
         <tr>
             <td align="center" style="padding:20px 32px 8px 32px;">
                 <div style="display:inline-block;padding:16px;border:1px solid #e4e4e7;border-radius:12px;background-color:#ffffff;">
-                    {!! $ticket->qrCode() !!}
+                    <img
+                        src="cid:{{ \App\Mail\TicketMail::QR_CID }}"
+                        alt="Código QR del boleto"
+                        width="220"
+                        height="220"
+                        style="display:block;width:220px;height:220px;border:0;"
+                    >
                 </div>
                 <p style="margin:12px 0 0 0;font-size:13px;color:#6b7280;">
                     Presenta este código en la entrada

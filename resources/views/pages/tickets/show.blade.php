@@ -51,14 +51,22 @@
                                     alt="Foto de {{ $ticket->buyer_name }}"
                                     class="h-40 w-full rounded-xl border border-gray-200 object-cover dark:border-gray-800"
                                 >
-                                <a
-                                    href="{{ route('tickets.photo', $ticket) }}"
-                                    target="_blank"
-                                    rel="noopener"
-                                    class="mt-2 inline-block text-xs text-brand-500 hover:underline"
-                                >
-                                    Abrir en tamaño completo
-                                </a>
+                                <div class="mt-2 flex flex-wrap items-center gap-4">
+                                    <a
+                                        href="{{ route('tickets.photo', $ticket) }}"
+                                        target="_blank"
+                                        rel="noopener"
+                                        class="text-xs text-brand-500 hover:underline"
+                                    >
+                                        Ver en tamaño completo
+                                    </a>
+                                    <a
+                                        href="{{ route('tickets.photo-download', $ticket) }}"
+                                        class="text-xs text-brand-500 hover:underline"
+                                    >
+                                        Descargar foto
+                                    </a>
+                                </div>
                             @else
                                 <p class="text-sm text-gray-500 dark:text-gray-400">Sin foto registrada.</p>
                             @endif
