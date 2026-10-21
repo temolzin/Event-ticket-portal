@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class TicketController extends Controller
 {
@@ -54,7 +55,7 @@ class TicketController extends Controller
 
         $ticket->load(['event', 'ticketType', 'seller']);
 
-        return view('pages.tickets.show', ['title' => 'Detalle del boleto', 'ticket' => $ticket]);
+        return view('pages.tickets.show', ['title' => 'Detalle del cliente', 'ticket' => $ticket]);
     }
 
     public function eventTypes(Event $event): JsonResponse
@@ -83,11 +84,39 @@ class TicketController extends Controller
         return to_route('tickets.show', $ticket);
     }
 
-    public function download(Ticket $ticket): RedirectResponse
+    public function download(Ticket $ticket): View
     {
         $this->authorize('view', $ticket);
 
-        return to_route('tickets.show', $ticket);
+        $ticket->load(['event', 'ticketType']);
+
+        return view('pages.tickets.print', ['title' => 'Boleto', 'ticket' => $ticket]);
+    }
+
+    public function buyerPhoto(Ticket $ticket): BinaryFileResponse
+    {
+        $this->authorize('view', $ticket);
+
+        $path = $ticket->buyerPhotoPath();
+
+        if (! $path || ! is_file($path)) {
+            abort(404);
+        }
+
+        return $this->privateFileResponse($path, 'foto-'.$ticket->buyer_name);
+    }
+
+    public function paymentReceipt(Ticket $ticket): BinaryFileResponse
+    {
+        $this->authorize('view', $ticket);
+
+        $path = $ticket->paymentReceiptPath();
+
+        if (! $path || ! is_file($path)) {
+            abort(404);
+        }
+
+        return $this->privateFileResponse($path, 'comprobante-'.$ticket->code);
     }
 
     public function cancel(Ticket $ticket): RedirectResponse
@@ -110,7 +139,16 @@ class TicketController extends Controller
             ->orderByDesc('id')
             ->paginate(15);
 
-        return view('pages.tickets.cancelled', ['title' => 'Boletos cancelados', 'tickets' => $tickets]);
+        return view('pages.tickets.cancelled', ['title' => 'Clientes cancelados', 'tickets' => $tickets]);
+    }
+
+    private function privateFileResponse(string $path, string $downloadName): BinaryFileResponse
+    {
+        return (new BinaryFileResponse($path, 200, [
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'Pragma' => 'no-cache',
+            'X-Content-Type-Options' => 'nosniff',
+        ], false))->setContentDisposition('inline', $downloadName);
     }
 
     private function registeredEvents(Request $request)

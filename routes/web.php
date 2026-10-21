@@ -60,6 +60,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
         Route::get('/tickets/events/{event}/types', [TicketController::class, 'eventTypes'])->name('tickets.event-types');
         Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
+        Route::get('/tickets/{ticket}/photo', [TicketController::class, 'buyerPhoto'])->name('tickets.photo');
+        Route::get('/tickets/{ticket}/receipt', [TicketController::class, 'paymentReceipt'])->name('tickets.receipt');
         Route::post('/tickets/{ticket}/send', [TicketController::class, 'send'])->name('tickets.send');
         Route::get('/tickets/{ticket}/download', [TicketController::class, 'download'])->name('tickets.download');
         Route::post('/tickets/{ticket}/cancel', [TicketController::class, 'cancel'])
