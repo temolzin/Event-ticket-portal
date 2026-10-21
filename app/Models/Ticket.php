@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Enums\TicketStatus;
+use App\Helpers\QrCodeHelper;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Ticket extends Model
@@ -98,5 +100,29 @@ class Ticket extends Model
     public function storePaymentReceipt(UploadedFile $receipt): void
     {
         $this->payment_receipt_path = $receipt->store('payment-receipts', 'local');
+    }
+
+    public function buyerPhotoPath(): ?string
+    {
+        return $this->buyer_photo_path
+            ? Storage::disk('local')->path($this->buyer_photo_path)
+            : null;
+    }
+
+    public function paymentReceiptPath(): ?string
+    {
+        return $this->payment_receipt_path
+            ? Storage::disk('local')->path($this->payment_receipt_path)
+            : null;
+    }
+
+    public function qrCode(): string
+    {
+        return QrCodeHelper::svg($this->code);
+    }
+
+    public function wasSent(): bool
+    {
+        return $this->sent_at !== null;
     }
 }
