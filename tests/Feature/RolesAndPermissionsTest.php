@@ -101,9 +101,11 @@ it('lets only the admin cancel a ticket', function () {
 it('lets the admin and the manager check in', function (UserRole $role) {
     actingRole($role);
 
+    $ticket = Ticket::factory()->create();
+
     $this->get('/check-in')->assertOk();
     $this->get('/check-in/log')->assertOk();
-    $this->post('/check-in')->assertOk();
+    $this->post('/check-in', ['code' => $ticket->code])->assertRedirect();
 })->with([
     'admin' => UserRole::Admin,
     'manager' => UserRole::Manager,
