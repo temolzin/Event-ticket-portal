@@ -119,7 +119,20 @@ class TicketController extends Controller
             abort(404);
         }
 
-        return $this->privateFileResponse($path, 'foto-'.$ticket->buyer_name);
+        return $this->privateFileResponse($path, 'foto-'.$ticket->code.$this->resolveExtension($path));
+    }
+
+    public function buyerPhotoDownload(Ticket $ticket): BinaryFileResponse
+    {
+        $this->authorize('view', $ticket);
+
+        $path = $ticket->buyerPhotoPath();
+
+        if (! $path || ! is_file($path)) {
+            abort(404);
+        }
+
+        return $this->privateFileResponse($path, 'foto-'.$ticket->code.$this->resolveExtension($path), 'attachment');
     }
 
     public function paymentReceipt(Ticket $ticket): BinaryFileResponse
@@ -132,7 +145,7 @@ class TicketController extends Controller
             abort(404);
         }
 
-        return $this->privateFileResponse($path, 'comprobante-'.$ticket->code);
+        return $this->privateFileResponse($path, 'comprobante-'.$ticket->code.$this->resolveExtension($path));
     }
 
     public function cancel(Ticket $ticket): RedirectResponse
@@ -158,13 +171,18 @@ class TicketController extends Controller
         return view('pages.tickets.cancelled', ['title' => 'Clientes cancelados', 'tickets' => $tickets]);
     }
 
-    private function privateFileResponse(string $path, string $downloadName): BinaryFileResponse
+    private function privateFileResponse(string $path, string $downloadName, string $disposition = 'inline'): BinaryFileResponse
     {
         return (new BinaryFileResponse($path, 200, [
             'Cache-Control' => 'private, no-store, max-age=0',
             'Pragma' => 'no-cache',
             'X-Content-Type-Options' => 'nosniff',
-        ], false))->setContentDisposition('inline', $downloadName);
+        ], false))->setContentDisposition($disposition, $downloadName);
+    }
+
+    private function resolveExtension(string $path): string
+    {
+        return '.'.pathinfo($path, PATHINFO_EXTENSION);
     }
 
     private function registeredEvents(Request $request)
