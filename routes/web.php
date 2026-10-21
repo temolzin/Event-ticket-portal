@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CheckInController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\TicketController;
@@ -23,9 +24,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-    Route::get('/', function () {
-        return view('pages.dashboard.index', ['title' => 'Panel']);
-    })->name('dashboard');
+    Route::get('/', [DashboardController::class, 'showDashboard'])->name('dashboard');
 
     Route::get('/profile', function () {
         return view('pages.profile', ['title' => 'Perfil']);
