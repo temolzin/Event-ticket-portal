@@ -64,7 +64,7 @@ it('lets the admin and the seller manage tickets', function (UserRole $role) {
     $this->get('/tickets')->assertOk();
     $this->get('/tickets/create')->assertOk();
     $this->get("/tickets/{$ticket->id}")->assertOk();
-    $this->get("/tickets/{$ticket->id}/download")->assertRedirect(route('tickets.show', $ticket));
+    $this->get("/tickets/{$ticket->id}/download")->assertOk();
     $this->post("/tickets/{$ticket->id}/send")->assertRedirect(route('tickets.show', $ticket));
 })->with([
     'admin' => UserRole::Admin,
