@@ -13,7 +13,7 @@ class TicketTypeFactory extends Factory
     {
         return [
             'event_id' => Event::factory(),
-            'key' => Str::lower(fake()->lexify('????')),
+            'key' => Str::lower(fake()->unique()->lexify('????')),
             'name' => fake()->words(2, true),
             'early_price' => fake()->randomFloat(2, 10, 500),
             'regular_price' => fake()->randomFloat(2, 500, 900),
