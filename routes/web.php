@@ -77,6 +77,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,manager')->group(function () {
         Route::get('/check-in', [CheckInController::class, 'create'])->name('check-in.scan');
         Route::post('/check-in', [CheckInController::class, 'store'])->name('check-in.store');
+        Route::get('/check-in/{scan}/result', [CheckInController::class, 'result'])->name('check-in.result');
         Route::get('/check-in/log', [CheckInController::class, 'index'])->name('check-in.log');
     });
 });

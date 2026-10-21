@@ -50,4 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.querySelector('#calendar')) {
         import('./components/calendar-init').then(module => module.calendarInit());
     }
+
+    // Check-in scanner init
+    if (document.querySelector('[data-check-in]')) {
+        import('./components/check-in-scanner').then(module => module.initCheckInScanner());
+    }
 });
