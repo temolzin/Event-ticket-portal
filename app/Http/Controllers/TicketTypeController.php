@@ -14,8 +14,6 @@ class TicketTypeController extends Controller
     {
         $this->authorize('viewAny', TicketType::class);
 
-        $event->loadCount(['tickets as sold_seats_count' => fn ($query) => $query->active()]);
-
         $ticketTypes = $event->ticketTypes()
             ->withCount(['tickets as sold_count'])
             ->orderBy('id')

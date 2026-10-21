@@ -56,6 +56,13 @@ class Event extends Model
 
     public function countSoldSeats(): int
     {
+        return (int) $this->activeTickets()
+            ->join('ticket_types', 'tickets.ticket_type_id', '=', 'ticket_types.id')
+            ->sum('ticket_types.seats_per_ticket');
+    }
+
+    public function countSoldTickets(): int
+    {
         return $this->activeTickets()->count();
     }
 
@@ -64,14 +71,14 @@ class Event extends Model
         return max($this->capacity - $this->countSoldSeats(), 0);
     }
 
-    public function hasAvailableSeats(): bool
+    public function hasAvailableSeats(int $seatsRequired = 1): bool
     {
-        return $this->countAvailableSeats() > 0;
+        return $this->countAvailableSeats() >= $seatsRequired;
     }
 
     public function isInEarlyPhase(): bool
     {
-        return $this->countSoldSeats() < $this->early_quantity;
+        return $this->countSoldTickets() < $this->early_quantity;
     }
 
     public function hasEnded(): bool

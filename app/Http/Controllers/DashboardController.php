@@ -84,7 +84,6 @@ class DashboardController extends Controller
 
         $eventCards = $this->getActiveEventQuery()
             ->withCount([
-                'tickets as sold_tickets_count' => fn (Builder $ticketQuery) => $ticketQuery->active(),
                 'tickets as checked_in_tickets_count' => fn (Builder $ticketQuery) => $ticketQuery
                     ->active()
                     ->whereNotNull('checked_in_at'),
@@ -101,6 +100,7 @@ class DashboardController extends Controller
             ->get();
 
         return $eventCards->map(function (Event $event) use ($dailyEventScanCounts, $viewer) {
+            $soldSeats = $event->countSoldSeats();
             $todayScans = $dailyEventScanCounts->get($event->id, [
                 'allowed' => 0,
                 'denied' => 0,
@@ -108,19 +108,19 @@ class DashboardController extends Controller
 
             return [
                 'event' => $event,
-                'sold' => $event->sold_tickets_count,
+                'sold' => $soldSeats,
                 'checkedIn' => $event->checked_in_tickets_count,
                 'salesPercentage' => min(
-                    (int) round($event->sold_tickets_count / max($event->capacity, 1) * 100),
+                    (int) round($soldSeats / max($event->capacity, 1) * 100),
                     100
                 ),
-                'metrics' => $this->buildEventMetrics($viewer, $event, $todayScans),
+                'metrics' => $this->buildEventMetrics($viewer, $event, $soldSeats, $todayScans),
                 'action' => $this->buildEventAction($viewer->role, $event),
             ];
         });
     }
 
-    private function buildEventMetrics(User $viewer, Event $event, array $todayScans): array
+    private function buildEventMetrics(User $viewer, Event $event, int $soldSeats, array $todayScans): array
     {
         $commonMetrics = [
             [
@@ -132,7 +132,7 @@ class DashboardController extends Controller
             [
                 'key' => 'seats-available',
                 'label' => __('Seats available'),
-                'value' => max($event->capacity - $event->sold_tickets_count, 0),
+                'value' => max($event->capacity - $soldSeats, 0),
                 'tone' => 'brand',
             ],
         ];

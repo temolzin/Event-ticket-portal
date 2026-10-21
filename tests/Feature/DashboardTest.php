@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\Event;
 use App\Models\Scan;
 use App\Models\Ticket;
+use App\Models\TicketType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -34,8 +35,15 @@ it('shows active event capacity and daily check-in metrics to admins', function 
         'capacity' => 4,
         'starts_at' => now()->addDays(4),
     ]);
+    $duoType = TicketType::factory()->create([
+        'event_id' => $event->id,
+        'key' => 'duo',
+        'name' => 'Boleto dupla',
+        'seats_per_ticket' => 2,
+    ]);
     $usedTicket = Ticket::factory()->create([
         'event_id' => $event->id,
+        'ticket_type_id' => $duoType->id,
         'seller_id' => $admin->id,
         'status' => TicketStatus::Used,
         'checked_in_at' => now(),
@@ -73,12 +81,13 @@ it('shows active event capacity and daily check-in metrics to admins', function 
         ->assertSee('Dashboard Event')
         ->assertDontSee('Inactive Event')
         ->assertDontSee('Past Event')
-        ->assertSee('Boletos vendidos')
+        ->assertSee('Lugares ocupados')
         ->assertSee('Boletos con check-in')
+        ->assertSee('3 / 10')
         ->assertSee('data-event-id="'.$event->id.'"', false)
         ->assertSee('data-event-id="'.$secondEvent->id.'"', false)
         ->assertSee('data-event-metric="checked-in" data-value="1"', false)
-        ->assertSee('data-event-metric="seats-available" data-value="8"', false)
+        ->assertSee('data-event-metric="seats-available" data-value="7"', false)
         ->assertSee('data-event-metric="allowed-today" data-value="1"', false)
         ->assertSee('data-event-metric="denied-today" data-value="1"', false)
         ->assertSee('data-event-metric="allowed-today" data-value="0"', false)

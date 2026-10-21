@@ -1,6 +1,6 @@
 @php
     $event = $event ?? null;
-    $ticketRows = $ticketRows ?? [['name' => '', 'early_price' => '', 'regular_price' => '']];
+    $ticketRows = $ticketRows ?? [['name' => '', 'seats_per_ticket' => 1, 'early_price' => '', 'regular_price' => '']];
 @endphp
 
 <div class="space-y-6">
@@ -110,7 +110,7 @@
             x-data="{
                 rows: @js($ticketRows),
                 addRow() {
-                    this.rows.push({ name: '', early_price: '', regular_price: '' });
+                    this.rows.push({ name: '', seats_per_ticket: 1, early_price: '', regular_price: '' });
                 },
                 removeRow(index) {
                     this.rows.splice(index, 1);
@@ -120,7 +120,7 @@
         >
             <template x-for="(row, index) in rows" :key="index">
                 <div class="grid grid-cols-1 gap-3 rounded-lg border border-gray-200 p-4 sm:grid-cols-12 dark:border-gray-800">
-                    <div class="sm:col-span-5">
+                    <div class="sm:col-span-4">
                         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Nombre del boleto</label>
                         <input
                             type="text"
@@ -130,7 +130,7 @@
                             class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
                         >
                     </div>
-                    <div class="sm:col-span-3">
+                    <div class="sm:col-span-2">
                         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Preventa</label>
                         <input
                             type="number"
@@ -141,7 +141,7 @@
                             class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
                         >
                     </div>
-                    <div class="sm:col-span-3">
+                    <div class="sm:col-span-2">
                         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Normal</label>
                         <input
                             type="number"
@@ -152,7 +152,19 @@
                             class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
                         >
                     </div>
-                    <div class="flex items-end sm:col-span-1">
+                    <div class="sm:col-span-2">
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{{ __('Seats per ticket') }}</label>
+                        <input
+                            type="number"
+                            min="1"
+                            max="1000"
+                            :name="`ticket_types[${index}][seats_per_ticket]`"
+                            x-model="row.seats_per_ticket"
+                            required
+                            class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:bg-gray-900 dark:text-white/90"
+                        >
+                    </div>
+                    <div class="flex items-end sm:col-span-2">
                         <button
                             type="button"
                             @click="removeRow(index)"

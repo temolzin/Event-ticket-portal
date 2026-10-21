@@ -145,6 +145,22 @@ it('rejects the sale when the event has no seats left', function () {
     expect(Ticket::query()->count())->toBe(1);
 });
 
+it('rejects a duo ticket when only one seat remains', function () {
+    Storage::fake('local');
+
+    [$event, $ticketType] = saleEventWithType(['capacity' => 1, 'early_quantity' => 1], [
+        'key' => 'duo',
+        'name' => 'Boleto dupla',
+        'seats_per_ticket' => 2,
+    ]);
+
+    $this->actingAs(saleSeller())
+        ->post('/tickets', salePayload($event, $ticketType))
+        ->assertSessionHasErrors('event_id');
+
+    expect(Ticket::query()->count())->toBe(0);
+});
+
 it('frees the seat when a ticket is cancelled', function () {
     [$event, $ticketType] = saleEventWithType(['capacity' => 1, 'early_quantity' => 1]);
 

@@ -43,7 +43,7 @@
                                 {{ $event->venue }}
                             </td>
                             <td class="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $event->sold_seats_count }} / {{ $event->capacity }}
+                                {{ $event->countSoldSeats() }} / {{ $event->capacity }}
                                 <span class="block text-xs text-gray-400 dark:text-gray-500">
                                     {{ $event->countAvailableSeats() }} disponibles
                                 </span>

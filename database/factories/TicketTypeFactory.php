@@ -15,6 +15,7 @@ class TicketTypeFactory extends Factory
             'event_id' => Event::factory(),
             'key' => Str::lower(fake()->unique()->lexify('????')),
             'name' => fake()->words(2, true),
+            'seats_per_ticket' => 1,
             'early_price' => fake()->randomFloat(2, 10, 500),
             'regular_price' => fake()->randomFloat(2, 500, 900),
             'is_active' => true,

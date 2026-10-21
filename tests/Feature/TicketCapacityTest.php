@@ -4,6 +4,7 @@ use App\Enums\TicketStatus;
 use App\Enums\UserRole;
 use App\Models\Event;
 use App\Models\Ticket;
+use App\Models\TicketType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -61,6 +62,58 @@ it('keeps a used ticket counting against the capacity', function () {
 
     expect($event->countSoldSeats())->toBe(1)
         ->and($event->countAvailableSeats())->toBe(9);
+});
+
+it('counts the seats defined by each active ticket type', function () {
+    $event = createEventWithCapacity(5);
+    $duoType = TicketType::factory()->create([
+        'event_id' => $event->id,
+        'key' => 'duo',
+        'name' => 'Boleto dupla',
+        'seats_per_ticket' => 2,
+    ]);
+    $individualType = TicketType::factory()->create([
+        'event_id' => $event->id,
+        'key' => 'individual',
+        'seats_per_ticket' => 1,
+    ]);
+
+    Ticket::factory()->create([
+        'event_id' => $event->id,
+        'ticket_type_id' => $duoType->id,
+    ]);
+    Ticket::factory()->create([
+        'event_id' => $event->id,
+        'ticket_type_id' => $individualType->id,
+    ]);
+
+    expect($event->countSoldSeats())->toBe(3)
+        ->and($event->countAvailableSeats())->toBe(2);
+
+    Ticket::query()
+        ->where('ticket_type_id', $duoType->id)
+        ->firstOrFail()
+        ->update(['status' => TicketStatus::Cancelled]);
+
+    expect($event->fresh()->countSoldSeats())->toBe(1)
+        ->and($event->fresh()->countAvailableSeats())->toBe(4);
+});
+
+it('keeps the early price quota based on tickets rather than occupied seats', function () {
+    $event = createEventWithCapacity(10);
+    $event->update(['early_quantity' => 2]);
+    $duoType = TicketType::factory()->create([
+        'event_id' => $event->id,
+        'seats_per_ticket' => 2,
+    ]);
+    Ticket::factory()->create([
+        'event_id' => $event->id,
+        'ticket_type_id' => $duoType->id,
+    ]);
+
+    expect($event->countSoldSeats())->toBe(2)
+        ->and($event->countSoldTickets())->toBe(1)
+        ->and($event->isInEarlyPhase())->toBeTrue();
 });
 
 it('never reports a negative number of available seats', function () {

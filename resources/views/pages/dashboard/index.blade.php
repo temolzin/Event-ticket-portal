@@ -65,7 +65,7 @@
                         <progress
                             class="h-2.5 w-full appearance-none overflow-hidden rounded-full bg-gray-100 text-brand-500 accent-brand-500 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-brand-500 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-gray-100 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-brand-500 dark:bg-gray-800 dark:[&::-webkit-progress-bar]:bg-gray-800"
                             role="progressbar"
-                            aria-label="{{ __('Tickets sold') }}"
+                            aria-label="{{ __('Occupied seats') }}"
                             aria-valuemin="0"
                             aria-valuemax="100"
                             aria-valuenow="{{ $eventCard['salesPercentage'] }}"
