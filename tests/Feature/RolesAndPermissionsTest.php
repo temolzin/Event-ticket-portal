@@ -49,12 +49,24 @@ it('lets only the admin manage users', function () {
     actingRole(UserRole::Admin);
     $this->get('/users')->assertOk();
     $this->get('/users/create')->assertOk();
+    $user = User::factory()->create();
+    $this->get("/users/{$user->id}/edit")->assertOk();
 
     actingRole(UserRole::Seller);
     $this->get('/users')->assertForbidden();
+    $this->get('/users/create')->assertForbidden();
+    $this->get("/users/{$user->id}/edit")->assertForbidden();
+    $this->post('/users', [])->assertForbidden();
+    $this->put("/users/{$user->id}", [])->assertForbidden();
+    $this->delete("/users/{$user->id}")->assertForbidden();
 
     actingRole(UserRole::Manager);
     $this->get('/users')->assertForbidden();
+    $this->get('/users/create')->assertForbidden();
+    $this->get("/users/{$user->id}/edit")->assertForbidden();
+    $this->post('/users', [])->assertForbidden();
+    $this->put("/users/{$user->id}", [])->assertForbidden();
+    $this->delete("/users/{$user->id}")->assertForbidden();
 });
 
 it('lets the admin and the seller manage tickets', function (UserRole $role) {
