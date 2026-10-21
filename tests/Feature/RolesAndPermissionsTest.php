@@ -2,6 +2,7 @@
 
 use App\Enums\UserRole;
 use App\Models\Event;
+use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -57,37 +58,44 @@ it('lets only the admin manage users', function () {
 });
 
 it('lets the admin and the seller manage tickets', function (UserRole $role) {
-    actingRole($role);
+    $user = actingRole($role);
+    $ticket = Ticket::factory()->create(['seller_id' => $user->id]);
 
     $this->get('/tickets')->assertOk();
     $this->get('/tickets/create')->assertOk();
-    $this->get('/tickets/1')->assertOk();
-    $this->get('/tickets/1/download')->assertRedirect(route('tickets.show', 1));
-    $this->post('/tickets/1/send')->assertRedirect(route('tickets.show', 1));
+    $this->get("/tickets/{$ticket->id}")->assertOk();
+    $this->get("/tickets/{$ticket->id}/download")->assertRedirect(route('tickets.show', $ticket));
+    $this->post("/tickets/{$ticket->id}/send")->assertRedirect(route('tickets.show', $ticket));
 })->with([
     'admin' => UserRole::Admin,
     'seller' => UserRole::Seller,
 ]);
 
 it('blocks the manager from every ticket page', function () {
+    $ticket = Ticket::factory()->create();
+
     actingRole(UserRole::Manager);
 
     $this->get('/tickets')->assertForbidden();
     $this->get('/tickets/create')->assertForbidden();
-    $this->get('/tickets/1')->assertForbidden();
-    $this->post('/tickets/1/send')->assertForbidden();
-    $this->get('/tickets/1/download')->assertForbidden();
+    $this->get("/tickets/{$ticket->id}")->assertForbidden();
+    $this->post("/tickets/{$ticket->id}/send")->assertForbidden();
+    $this->get("/tickets/{$ticket->id}/download")->assertForbidden();
 });
 
 it('lets only the admin cancel a ticket', function () {
+    $ticket = Ticket::factory()->create();
+
     actingRole(UserRole::Admin);
-    $this->post('/tickets/1/cancel')->assertRedirect(route('tickets.show', 1));
+    $this->post("/tickets/{$ticket->id}/cancel")->assertRedirect(route('tickets.show', $ticket));
+
+    $other = Ticket::factory()->create();
 
     actingRole(UserRole::Seller);
-    $this->post('/tickets/1/cancel')->assertForbidden();
+    $this->post("/tickets/{$other->id}/cancel")->assertForbidden();
 
     actingRole(UserRole::Manager);
-    $this->post('/tickets/1/cancel')->assertForbidden();
+    $this->post("/tickets/{$other->id}/cancel")->assertForbidden();
 });
 
 it('lets the admin and the manager check in', function (UserRole $role) {
