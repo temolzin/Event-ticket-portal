@@ -44,6 +44,13 @@ class TicketType extends Model
         return $this->tickets()->exists();
     }
 
+    public function priceForPhase(bool $earlyPhase): float
+    {
+        $early = $earlyPhase && $this->early_price !== null;
+
+        return (float) ($early ? $this->early_price : $this->regular_price);
+    }
+
     public function canBeDeleted(): bool
     {
         return ! $this->hasSales();

@@ -2,49 +2,142 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTicketRequest;
+use App\Enums\TicketStatus;
+use App\Models\Event;
+use App\Models\Ticket;
+use App\Models\TicketType;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
-class TicketController
+class TicketController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        return view('pages.tickets.index', ['title' => 'Boletos']);
+        $this->authorize('viewAny', Ticket::class);
+
+        $events = $this->registeredEvents($request);
+
+        return view('pages.tickets.index', ['title' => 'Clientes', 'events' => $events]);
     }
 
     public function create(): View
     {
-        return view('pages.tickets.create', ['title' => 'Nuevo boleto']);
+        $this->authorize('create', Ticket::class);
+
+        return view('pages.tickets.create', [
+            'title' => 'Registrar venta',
+            'events' => $this->sellableEvents(),
+        ]);
     }
 
-    public function show(int $ticket): View
+    public function store(StoreTicketRequest $request): RedirectResponse
     {
+        $ticket = DB::transaction(fn () => Ticket::create(
+            $request->ticketAttributes($request->user()->id)
+        ));
+
+        $ticket->storeBuyerPhoto($request->file('buyer_photo'));
+        $ticket->storePaymentReceipt($request->file('payment_receipt'));
+        $ticket->save();
+
+        return to_route('tickets.show', $ticket)
+            ->with('status', 'Venta registrada correctamente.');
+    }
+
+    public function show(Ticket $ticket): View
+    {
+        $this->authorize('view', $ticket);
+
+        $ticket->load(['event', 'ticketType', 'seller']);
+
         return view('pages.tickets.show', ['title' => 'Detalle del boleto', 'ticket' => $ticket]);
     }
 
-    public function store(): RedirectResponse
+    public function eventTypes(Event $event): JsonResponse
     {
-        return to_route('tickets.index');
+        $this->authorize('create', Ticket::class);
+
+        $earlyPhase = $event->isInEarlyPhase();
+
+        return response()->json(
+            $event->activeTicketTypes()
+                ->orderBy('id')
+                ->get()
+                ->map(fn (TicketType $type) => [
+                    'id' => $type->id,
+                    'label' => $type->name.' · $'.number_format($type->priceForPhase($earlyPhase), 2),
+                ])
+                ->values()
+                ->all()
+        );
     }
 
-    public function send(int $ticket): RedirectResponse
+    public function send(Ticket $ticket): RedirectResponse
     {
+        $this->authorize('send', $ticket);
+
         return to_route('tickets.show', $ticket);
     }
 
-    public function download(int $ticket): RedirectResponse
+    public function download(Ticket $ticket): RedirectResponse
     {
+        $this->authorize('view', $ticket);
+
         return to_route('tickets.show', $ticket);
     }
 
-    public function cancel(Request $request, int $ticket): RedirectResponse
+    public function cancel(Ticket $ticket): RedirectResponse
     {
-        return to_route('tickets.show', $ticket);
+        $this->authorize('cancel', $ticket);
+
+        $ticket->update(['status' => TicketStatus::Cancelled]);
+
+        return to_route('tickets.show', $ticket)
+            ->with('status', 'Boleto cancelado correctamente.');
     }
 
     public function cancelled(): View
     {
-        return view('pages.tickets.cancelled', ['title' => 'Boletos cancelados']);
+        $this->authorize('viewCancelled', Ticket::class);
+
+        $tickets = Ticket::query()
+            ->cancelled()
+            ->with(['event', 'ticketType', 'seller'])
+            ->orderByDesc('id')
+            ->paginate(15);
+
+        return view('pages.tickets.cancelled', ['title' => 'Boletos cancelados', 'tickets' => $tickets]);
+    }
+
+    private function registeredEvents(Request $request)
+    {
+        return Event::query()
+            ->whereHas('tickets', fn ($query) => $query->when(
+                ! $request->user()->isAdmin(),
+                fn ($inner) => $inner->soldBy($request->user()->id)
+            ))
+            ->with([
+                'tickets' => fn ($query) => $query
+                    ->when(
+                        ! $request->user()->isAdmin(),
+                        fn ($inner) => $inner->soldBy($request->user()->id)
+                    )
+                    ->with(['ticketType', 'seller'])
+                    ->orderByDesc('id'),
+            ])
+            ->orderByDesc('starts_at')
+            ->get();
+    }
+
+    private function sellableEvents()
+    {
+        return Event::query()
+            ->where('is_active', true)
+            ->orderBy('starts_at')
+            ->get();
     }
 }

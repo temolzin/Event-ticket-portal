@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 
 class Ticket extends Model
 {
@@ -81,5 +83,20 @@ class Ticket extends Model
     public function wasUsed(): bool
     {
         return $this->checked_in_at !== null;
+    }
+
+    public static function generateCode(): string
+    {
+        return (string) Str::ulid();
+    }
+
+    public function storeBuyerPhoto(UploadedFile $photo): void
+    {
+        $this->buyer_photo_path = $photo->store('buyer-photos', 'local');
+    }
+
+    public function storePaymentReceipt(UploadedFile $receipt): void
+    {
+        $this->payment_receipt_path = $receipt->store('payment-receipts', 'local');
     }
 }
