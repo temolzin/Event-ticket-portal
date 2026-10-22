@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\BadgeController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
@@ -55,6 +56,14 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('role:admin,seller')->group(function () {
+        Route::get('/badges', [BadgeController::class, 'index'])->name('badges.index');
+        Route::get('/badges/events/{event}', [BadgeController::class, 'showEvent'])->name('badges.events.show');
+        Route::get('/badges/events/{event}/print', [BadgeController::class, 'printAll'])->name('badges.events.print');
+        Route::post('/badges/events/{event}/print-selected', [BadgeController::class, 'printSelected'])
+            ->name('badges.events.print-selected');
+        Route::get('/badges/tickets/{ticket}', [BadgeController::class, 'printTicket'])
+            ->name('badges.tickets.print');
+
         Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
         Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
         Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
