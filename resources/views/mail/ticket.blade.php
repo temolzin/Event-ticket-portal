@@ -10,7 +10,7 @@
         <tr>
             <td style="padding:28px 32px 12px 32px;">
                 <p style="margin:0 0 4px 0;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:#7c3aed;font-weight:600;">
-                    Tu boleto está listo
+                    Boleto digital
                 </p>
                 <h1 style="margin:0;font-size:22px;font-weight:700;color:#111827;">
                     {{ $ticket->event->name }}
@@ -21,8 +21,7 @@
         <tr>
             <td style="padding:16px 32px 0 32px;">
                 <p style="margin:0 0 20px 0;font-size:15px;line-height:1.6;color:#4b5563;">
-                    Hola {{ $ticket->buyer_name }}, aquí tienes el boleto que registraste.
-                    Preséntalo en la entrada junto con tu identificación.
+                    Hola {{ $ticket->buyer_name }}, preséntalo en la entrada junto con tu identificación.
                 </p>
             </td>
         </tr>
