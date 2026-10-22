@@ -284,7 +284,9 @@ it('allows the seller to edit their customer details without changing ticket dat
         ->get(route('tickets.edit', $ticket))
         ->assertOk()
         ->assertSee('Ana López')
-        ->assertSee('Editar cliente');
+        ->assertSee('Editar cliente')
+        ->assertSee('href="'.route('tickets.index').'"', false)
+        ->assertSee('href="'.route('tickets.show', $ticket).'"', false);
 
     $this->put(route('tickets.update', $ticket), [
         'buyer_name' => 'Andrea López',

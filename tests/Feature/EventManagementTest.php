@@ -41,7 +41,8 @@ it('shows the event detail', function () {
         ->get("/events/{$event->id}")
         ->assertOk()
         ->assertSee('Evento Detalle')
-        ->assertSee('Salón A');
+        ->assertSee('Salón A')
+        ->assertSee('href="'.route('events.index').'"', false);
 });
 
 it('creates an event', function () {
