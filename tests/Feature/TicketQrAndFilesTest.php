@@ -227,6 +227,7 @@ it('builds the mail with the buyer data and the event', function () {
 
     expect($rendered)->toContain($ticket->buyer_name)
         ->and($rendered)->toContain($ticket->event->name)
+        ->and($rendered)->toContain('Boleto digital')
         ->and($rendered)->toContain($ticket->code)
         ->and($rendered)->toContain('cid:'.TicketMail::QR_CID)
         ->and($rendered)->not->toContain('<svg');
