@@ -76,6 +76,7 @@ it('lets the admin and the seller manage tickets', function (UserRole $role) {
     $this->get('/tickets')->assertOk();
     $this->get('/tickets/create')->assertOk();
     $this->get("/tickets/{$ticket->id}")->assertOk();
+    $this->get("/tickets/{$ticket->id}/edit")->assertOk();
     $this->get("/tickets/{$ticket->id}/download")->assertOk();
     $this->post("/tickets/{$ticket->id}/send")->assertRedirect(route('tickets.show', $ticket));
 })->with([
@@ -91,6 +92,7 @@ it('blocks the manager from every ticket page', function () {
     $this->get('/tickets')->assertForbidden();
     $this->get('/tickets/create')->assertForbidden();
     $this->get("/tickets/{$ticket->id}")->assertForbidden();
+    $this->get("/tickets/{$ticket->id}/edit")->assertForbidden();
     $this->post("/tickets/{$ticket->id}/send")->assertForbidden();
     $this->get("/tickets/{$ticket->id}/download")->assertForbidden();
 });
@@ -99,12 +101,13 @@ it('lets only the admin cancel a ticket', function () {
     $ticket = Ticket::factory()->create();
 
     actingRole(UserRole::Admin);
-    $this->post("/tickets/{$ticket->id}/cancel")->assertRedirect(route('tickets.show', $ticket));
+    $this->post("/tickets/{$ticket->id}/cancel")->assertRedirect(route('tickets.cancelled'));
 
     $other = Ticket::factory()->create();
 
     actingRole(UserRole::Seller);
     $this->post("/tickets/{$other->id}/cancel")->assertForbidden();
+    $this->delete("/tickets/{$other->id}")->assertForbidden();
 
     actingRole(UserRole::Manager);
     $this->post("/tickets/{$other->id}/cancel")->assertForbidden();
@@ -142,12 +145,11 @@ it('lets only the admin see the cancelled tickets list', function () {
     $this->get('/tickets-cancelled')->assertForbidden();
 });
 
-it('never exposes an edit or delete route for tickets', function () {
+it('exposes ticket edit, update, and cancellation routes', function () {
     $ticketRoutes = collect(app('router')->getRoutes())
         ->map(fn ($route) => $route->uri())
         ->filter(fn (string $uri) => str_starts_with($uri, 'tickets'));
 
-    expect($ticketRoutes->contains(fn (string $uri) => str_contains($uri, 'edit')))->toBeFalse()
-        ->and($ticketRoutes->contains(fn (string $uri) => str_contains($uri, 'delete')))->toBeFalse()
-        ->and($ticketRoutes->contains(fn (string $uri) => str_contains($uri, 'update')))->toBeFalse();
+    expect($ticketRoutes->contains(fn (string $uri) => str_contains($uri, 'edit')))->toBeTrue()
+        ->and($ticketRoutes->contains(fn (string $uri) => str_contains($uri, '{ticket}')))->toBeTrue();
 });

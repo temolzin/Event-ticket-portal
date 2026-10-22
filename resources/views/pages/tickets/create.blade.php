@@ -21,6 +21,7 @@
                     'earlyPhase' => $event->isInEarlyPhase(),
                 ])),
                 typesUrl: @js(route('tickets.event-types', ['event' => '__ID__'])),
+                cancelledMatchUrl: @js(route('tickets.cancelled-match')),
             })"
             class="grid grid-cols-1 gap-5 lg:grid-cols-3"
         >
@@ -29,8 +30,10 @@
                     method="POST"
                     action="{{ route('tickets.store') }}"
                     enctype="multipart/form-data"
+                    @submit.prevent="checkCancelledClient($event)"
                 >
                     @csrf
+                    <input type="hidden" name="confirm_cancelled_client" value="0">
 
                     <div class="space-y-6">
                         <x-common.component-card title="Evento y boleto">
@@ -151,6 +154,9 @@
                         </x-common.component-card>
 
                         <div class="flex flex-wrap items-center justify-end gap-3">
+                            @error('cancelled_client_confirmation')
+                                <p class="w-full text-end text-sm text-error-500">{{ $message }}</p>
+                            @enderror
                             <a
                                 href="{{ route('tickets.index') }}"
                                 class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
@@ -182,13 +188,15 @@
 
         @push('scripts')
             <script>
-                function saleForm({ events, typesUrl }) {
+                function saleForm({ events, typesUrl, cancelledMatchUrl }) {
                     return {
                         events,
                         typesUrl,
+                        cancelledMatchUrl,
                         eventId: '',
                         ticketTypeId: '',
                         types: [],
+                        isCheckingCancelledClient: false,
 
                         get selectedEvent() {
                             return this.events.find((event) => String(event.id) === String(this.eventId)) ?? null;
@@ -217,6 +225,44 @@
                             }
 
                             this.types = await response.json();
+                        },
+
+                        async checkCancelledClient(event) {
+                            if (this.isCheckingCancelledClient) {
+                                return;
+                            }
+
+                            this.isCheckingCancelledClient = true;
+
+                            try {
+                                const form = event.target;
+                                const params = new URLSearchParams({
+                                    buyer_name: form.elements.buyer_name.value,
+                                    buyer_email: form.elements.buyer_email.value,
+                                });
+                                const response = await fetch(`${this.cancelledMatchUrl}?${params}`, {
+                                    headers: { Accept: 'application/json' },
+                                });
+
+                                if (!response.ok) {
+                                    throw new Error('No se pudo verificar la lista de clientes cancelados.');
+                                }
+
+                                const result = await response.json();
+
+                                if (result.exists && ! window.confirm(
+                                    'Este cliente aparece en la lista de clientes cancelados. ¿Aun así deseas agregarlo?'
+                                )) {
+                                    return;
+                                }
+
+                                form.elements.confirm_cancelled_client.value = result.exists ? '1' : '0';
+                                form.submit();
+                            } catch (error) {
+                                window.alert(error.message);
+                            } finally {
+                                this.isCheckingCancelledClient = false;
+                            }
                         },
                     };
                 }

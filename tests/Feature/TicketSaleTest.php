@@ -269,6 +269,166 @@ it('shows the count of clients per event', function () {
         ->assertSee('3 clientes registrados');
 });
 
+it('allows the seller to edit their customer details without changing ticket data', function () {
+    Storage::fake('local');
+    $seller = saleSeller();
+    $ticket = Ticket::factory()->create([
+        'seller_id' => $seller->id,
+        'buyer_name' => 'Ana López',
+        'buyer_email' => 'ana@ejemplo.com',
+        'status' => TicketStatus::Sent,
+        'sent_at' => now(),
+    ]);
+
+    $this->actingAs($seller)
+        ->get(route('tickets.edit', $ticket))
+        ->assertOk()
+        ->assertSee('Ana López')
+        ->assertSee('Editar cliente');
+
+    $this->put(route('tickets.update', $ticket), [
+        'buyer_name' => 'Andrea López',
+        'buyer_email' => 'ANDREA@EJEMPLO.COM',
+    ])
+        ->assertRedirect(route('tickets.show', $ticket));
+
+    expect($ticket->fresh()->buyer_name)->toBe('Andrea López')
+        ->and($ticket->fresh()->buyer_email)->toBe('andrea@ejemplo.com')
+        ->and($ticket->fresh()->status)->toBe(TicketStatus::Sent)
+        ->and($ticket->fresh()->code)->toBe($ticket->code);
+});
+
+it('warns when a customer name or email matches a cancelled client', function () {
+    $seller = saleSeller();
+    Ticket::factory()->create([
+        'status' => TicketStatus::Cancelled,
+        'buyer_name' => 'Ana López',
+        'buyer_email' => 'ana@example.com',
+    ]);
+    Ticket::factory()->create([
+        'status' => TicketStatus::Sent,
+        'buyer_name' => 'Active Client',
+        'buyer_email' => 'active@example.com',
+    ]);
+
+    $this->actingAs($seller)
+        ->getJson(route('tickets.cancelled-match', [
+            'buyer_name' => '  ANA López ',
+            'buyer_email' => 'different@example.com',
+        ]))
+        ->assertOk()
+        ->assertJson(['exists' => true]);
+
+    $this->getJson(route('tickets.cancelled-match', [
+        'buyer_name' => 'Another Name',
+        'buyer_email' => 'ANA@example.com',
+    ]))
+        ->assertOk()
+        ->assertJson(['exists' => true]);
+
+    $this->getJson(route('tickets.cancelled-match', [
+        'buyer_name' => 'Active Client',
+        'buyer_email' => 'active@example.com',
+    ]))
+        ->assertOk()
+        ->assertJson(['exists' => false]);
+});
+
+it('requires confirmation before registering a customer from the cancelled list', function () {
+    Storage::fake('local');
+    [$event, $ticketType] = saleEventWithType();
+    $seller = saleSeller();
+    Ticket::factory()->create([
+        'status' => TicketStatus::Cancelled,
+        'buyer_name' => 'Ana López',
+        'buyer_email' => 'ana@ejemplo.com',
+    ]);
+    $payload = salePayload($event, $ticketType);
+
+    $this->actingAs($seller)
+        ->post(route('tickets.store'), $payload)
+        ->assertSessionHasErrors('cancelled_client_confirmation');
+
+    expect(Ticket::query()->count())->toBe(1);
+
+    $this->post(route('tickets.store'), $payload + ['confirm_cancelled_client' => '1'])
+        ->assertRedirect();
+
+    expect(Ticket::query()->count())->toBe(2);
+});
+
+it('replaces optional customer files and removes the previous private files', function () {
+    Storage::fake('local');
+    $seller = saleSeller();
+    $ticket = Ticket::factory()->create(['seller_id' => $seller->id]);
+    $ticket->storeBuyerPhoto(UploadedFile::fake()->image('old-photo.jpg'));
+    $ticket->storePaymentReceipt(UploadedFile::fake()->image('old-receipt.jpg'));
+    $ticket->save();
+    $oldPhoto = $ticket->buyer_photo_path;
+    $oldReceipt = $ticket->payment_receipt_path;
+
+    $this->actingAs($seller)
+        ->put(route('tickets.update', $ticket), [
+            'buyer_name' => 'Cliente Actualizado',
+            'buyer_email' => 'actualizado@ejemplo.com',
+            'buyer_photo' => UploadedFile::fake()->image('new-photo.jpg'),
+            'payment_receipt' => UploadedFile::fake()->image('new-receipt.jpg'),
+        ])
+        ->assertRedirect(route('tickets.show', $ticket));
+
+    $updated = $ticket->fresh();
+    expect($updated->buyer_photo_path)->not->toBe($oldPhoto)
+        ->and($updated->payment_receipt_path)->not->toBe($oldReceipt);
+
+    Storage::disk('local')->assertMissing($oldPhoto);
+    Storage::disk('local')->assertMissing($oldReceipt);
+    Storage::disk('local')->assertExists($updated->buyer_photo_path);
+    Storage::disk('local')->assertExists($updated->payment_receipt_path);
+});
+
+it('prevents sellers from editing another sellers customer and blocks used or cancelled tickets', function () {
+    $seller = saleSeller();
+    $otherSellerTicket = Ticket::factory()->create(['seller_id' => saleSeller()->id]);
+    $usedTicket = Ticket::factory()->create([
+        'seller_id' => $seller->id,
+        'status' => TicketStatus::Used,
+        'checked_in_at' => now(),
+    ]);
+    $cancelledTicket = Ticket::factory()->create([
+        'seller_id' => $seller->id,
+        'status' => TicketStatus::Cancelled,
+    ]);
+
+    $this->actingAs($seller)
+        ->get(route('tickets.edit', $otherSellerTicket))
+        ->assertForbidden();
+
+    $this->get(route('tickets.edit', $usedTicket))->assertForbidden();
+    $this->get(route('tickets.edit', $cancelledTicket))->assertForbidden();
+});
+
+it('moves a cancelled customer out of the active module and into cancelled clients', function () {
+    $admin = User::factory()->create(['role' => UserRole::Admin]);
+    $activeTicket = Ticket::factory()->create(['buyer_name' => 'Active Client']);
+    $cancelledTicket = Ticket::factory()->create(['buyer_name' => 'Cancelled Client']);
+
+    $this->actingAs($admin)
+        ->delete(route('tickets.destroy', $cancelledTicket))
+        ->assertRedirect(route('tickets.cancelled'));
+
+    $this->get(route('tickets.index'))
+        ->assertOk()
+        ->assertSee('Active Client')
+        ->assertDontSee('Cancelled Client');
+
+    $this->get(route('tickets.cancelled'))
+        ->assertOk()
+        ->assertSee('Cancelled Client');
+
+    expect($cancelledTicket->fresh()->status)->toBe(TicketStatus::Cancelled)
+        ->and(Ticket::query()->whereKey($activeTicket->id)->exists())->toBeTrue();
+});
+
 it('leaves out an event with no sales', function () {
     $seller = saleSeller();
     Event::factory()->create(['name' => 'Evento Sin Ventas']);

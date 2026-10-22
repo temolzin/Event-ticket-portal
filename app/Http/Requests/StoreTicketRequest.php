@@ -32,6 +32,7 @@ class StoreTicketRequest extends FormRequest
             ],
             'buyer_name' => ['required', 'string', 'max:255'],
             'buyer_email' => ['required', 'email', 'max:255'],
+            'confirm_cancelled_client' => ['nullable', 'boolean'],
             'buyer_photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'payment_receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:10240'],
         ];
@@ -72,6 +73,20 @@ class StoreTicketRequest extends FormRequest
     public function withValidator(\Illuminate\Validation\Validator $validator): void
     {
         $validator->after(function ($validator) {
+            $cancelledClientExists = Ticket::query()
+                ->cancelled()
+                ->matchingCancelledClient(
+                    (string) $this->input('buyer_name', ''),
+                    (string) $this->input('buyer_email', '')
+                )
+                ->exists();
+
+            $validator->errors()->addIf(
+                $cancelledClientExists && ! $this->boolean('confirm_cancelled_client'),
+                'cancelled_client_confirmation',
+                'Este cliente aparece en la lista de clientes cancelados. Confirma si deseas registrarlo de todos modos.'
+            );
+
             $event = Event::query()
                 ->whereKey($this->integer('event_id'))
                 ->where('is_active', true)

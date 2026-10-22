@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreTicketRequest;
 use App\Enums\TicketStatus;
+use App\Http\Requests\StoreTicketRequest;
+use App\Http\Requests\UpdateTicketRequest;
 use App\Mail\TicketMail;
 use App\Models\Event;
 use App\Models\Ticket;
@@ -13,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
@@ -61,6 +63,45 @@ class TicketController extends Controller
         return view('pages.tickets.show', ['title' => 'Detalle del cliente', 'ticket' => $ticket]);
     }
 
+    public function edit(Ticket $ticket): View
+    {
+        $this->authorize('update', $ticket);
+
+        return view('pages.tickets.edit', [
+            'title' => 'Editar cliente',
+            'ticket' => $ticket->load(['event', 'ticketType']),
+        ]);
+    }
+
+    public function update(UpdateTicketRequest $request, Ticket $ticket): RedirectResponse
+    {
+        $attributes = $request->ticketAttributes();
+        $ticket->fill($attributes);
+
+        if ($request->hasFile('buyer_photo')) {
+            $previousPhoto = $ticket->buyer_photo_path;
+            $ticket->storeBuyerPhoto($request->file('buyer_photo'));
+
+            if ($previousPhoto) {
+                Storage::disk('local')->delete($previousPhoto);
+            }
+        }
+
+        if ($request->hasFile('payment_receipt')) {
+            $previousReceipt = $ticket->payment_receipt_path;
+            $ticket->storePaymentReceipt($request->file('payment_receipt'));
+
+            if ($previousReceipt) {
+                Storage::disk('local')->delete($previousReceipt);
+            }
+        }
+
+        $ticket->save();
+
+        return to_route('tickets.show', $ticket)
+            ->with('status', 'Datos del cliente actualizados correctamente.');
+    }
+
     public function eventTypes(Event $event): JsonResponse
     {
         $this->authorize('create', Ticket::class);
@@ -78,6 +119,25 @@ class TicketController extends Controller
                 ->values()
                 ->all()
         );
+    }
+
+    public function checkCancelledClient(Request $request): JsonResponse
+    {
+        $this->authorize('create', Ticket::class);
+        $validated = $request->validate([
+            'buyer_name' => ['nullable', 'string', 'max:255'],
+            'buyer_email' => ['nullable', 'email', 'max:255'],
+        ]);
+        $name = $validated['buyer_name'] ?? '';
+        $email = $validated['buyer_email'] ?? '';
+
+        return response()->json([
+            'exists' => ($name !== '' || $email !== '')
+                && Ticket::query()
+                    ->cancelled()
+                    ->matchingCancelledClient($name, $email)
+                    ->exists(),
+        ]);
     }
 
     public function send(Ticket $ticket): RedirectResponse
@@ -154,8 +214,13 @@ class TicketController extends Controller
 
         $ticket->update(['status' => TicketStatus::Cancelled]);
 
-        return to_route('tickets.show', $ticket)
-            ->with('status', 'Boleto cancelado correctamente.');
+        return to_route('tickets.cancelled')
+            ->with('status', 'Cliente cancelado correctamente.');
+    }
+
+    public function destroy(Ticket $ticket): RedirectResponse
+    {
+        return $this->cancel($ticket);
     }
 
     public function cancelled(): View
@@ -188,12 +253,13 @@ class TicketController extends Controller
     private function registeredEvents(Request $request)
     {
         return Event::query()
-            ->whereHas('tickets', fn ($query) => $query->when(
+            ->whereHas('tickets', fn ($query) => $query->active()->when(
                 ! $request->user()->isAdmin(),
                 fn ($inner) => $inner->soldBy($request->user()->id)
             ))
             ->with([
                 'tickets' => fn ($query) => $query
+                    ->active()
                     ->when(
                         ! $request->user()->isAdmin(),
                         fn ($inner) => $inner->soldBy($request->user()->id)
