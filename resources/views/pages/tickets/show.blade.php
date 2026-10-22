@@ -5,6 +5,33 @@
 
     <x-common.flash />
 
+    <div class="mb-5 flex flex-wrap justify-end gap-3">
+        @can('update', $ticket)
+            <a
+                href="{{ route('tickets.edit', $ticket) }}"
+                class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+            >
+                Editar cliente
+            </a>
+        @endcan
+        @can('cancel', $ticket)
+            <form
+                method="POST"
+                action="{{ route('tickets.destroy', $ticket) }}"
+                onsubmit="return confirm('¿Cancelar este boleto? El cliente aparecerá en Clientes cancelados.');"
+            >
+                @csrf
+                @method('DELETE')
+                <button
+                    type="submit"
+                    class="inline-flex items-center justify-center rounded-lg border border-error-200 px-4 py-2.5 text-sm font-medium text-error-600 transition hover:bg-error-50 dark:border-error-500/30 dark:text-error-400 dark:hover:bg-error-500/10"
+                >
+                    Cancelar cliente
+                </button>
+            </form>
+        @endcan
+    </div>
+
     <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div class="lg:col-span-2">
             <x-common.component-card title="Datos del cliente">

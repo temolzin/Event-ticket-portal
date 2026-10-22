@@ -77,6 +77,29 @@ class Ticket extends Model
         return $query->where('seller_id', $sellerId);
     }
 
+    public function scopeMatchingCancelledClient(Builder $query, string $name, string $email): Builder
+    {
+        $name = mb_strtolower(trim($name));
+        $email = mb_strtolower(trim($email));
+
+        return $query->where(function (Builder $matches) use ($name, $email) {
+            if ($name === '' && $email === '') {
+                $matches->whereRaw('1 = 0');
+
+                return;
+            }
+
+            if ($name !== '') {
+                $matches->whereRaw('LOWER(TRIM(buyer_name)) = ?', [$name]);
+            }
+
+            if ($email !== '') {
+                $method = $name === '' ? 'whereRaw' : 'orWhereRaw';
+                $matches->{$method}('LOWER(TRIM(buyer_email)) = ?', [$email]);
+            }
+        });
+    }
+
     public function isCancelled(): bool
     {
         return $this->status === TicketStatus::Cancelled;

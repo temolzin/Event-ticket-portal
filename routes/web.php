@@ -66,8 +66,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
         Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
+        Route::get('/tickets/cancelled-match', [TicketController::class, 'checkCancelledClient'])
+            ->name('tickets.cancelled-match');
         Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
         Route::get('/tickets/events/{event}/types', [TicketController::class, 'eventTypes'])->name('tickets.event-types');
+        Route::get('/tickets/{ticket}/edit', [TicketController::class, 'edit'])->name('tickets.edit');
+        Route::put('/tickets/{ticket}', [TicketController::class, 'update'])->name('tickets.update');
         Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
         Route::get('/tickets/{ticket}/photo', [TicketController::class, 'buyerPhoto'])->name('tickets.photo');
         Route::get('/tickets/{ticket}/photo/download', [TicketController::class, 'buyerPhotoDownload'])->name('tickets.photo-download');
@@ -77,6 +81,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/tickets/{ticket}/cancel', [TicketController::class, 'cancel'])
             ->middleware('role:admin')
             ->name('tickets.cancel');
+        Route::delete('/tickets/{ticket}', [TicketController::class, 'destroy'])
+            ->middleware('role:admin')
+            ->name('tickets.destroy');
 
         Route::get('/tickets-cancelled', [TicketController::class, 'cancelled'])
             ->middleware('role:admin')
