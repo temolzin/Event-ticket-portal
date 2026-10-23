@@ -49,9 +49,9 @@
             </button>
 
             <!-- Logo (mobile only) -->
-            <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 xl:hidden">
+            <a href="{{ route('dashboard') }}" class="inline-flex min-w-0 items-center gap-2 xl:hidden">
                 <img src="/images/logo/logo-icon.svg" alt="" width="32" height="32" />
-                <span class="whitespace-nowrap text-xl font-semibold text-gray-900 dark:text-white">
+                <span class="hidden whitespace-nowrap text-base font-semibold text-gray-900 xsm:block sm:text-xl dark:text-white">
                     Portal de Eventos
                 </span>
             </a>
