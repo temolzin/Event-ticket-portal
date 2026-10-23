@@ -52,22 +52,6 @@
                         href="{{ route('dashboard') }}"
                     >
                         {{ __('Home') }}
-                        <svg
-                            class="stroke-current rtl:rotate-180"
-                            width="17"
-                            height="16"
-                            viewBox="0 0 17 16"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                d="M6.0765 12.667L10.2432 8.50033L6.0765 4.33366"
-                                stroke=""
-                                stroke-width="1.2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            />
-                        </svg>
                     </a>
                 </li>
             @endif
@@ -98,9 +82,34 @@
                     </a>
                 </li>
             @endforeach
-            <li class="text-sm text-gray-800 dark:text-white/90" aria-current="page">
-                {{ $pageTitle }}
-            </li>
+            @if($routeName !== 'dashboard')
+                <li class="flex items-center gap-1.5">
+                    <svg
+                        class="stroke-current text-gray-400 rtl:rotate-180 dark:text-gray-500"
+                        width="17"
+                        height="16"
+                        viewBox="0 0 17 16"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                    >
+                        <path
+                            d="M6.0765 12.667L10.2432 8.50033L6.0765 4.33366"
+                            stroke=""
+                            stroke-width="1.2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </svg>
+                    <span class="text-sm text-gray-800 dark:text-white/90" aria-current="page">
+                        {{ $pageTitle }}
+                    </span>
+                </li>
+            @else
+                <li class="text-sm text-gray-800 dark:text-white/90" aria-current="page">
+                    {{ $pageTitle }}
+                </li>
+            @endif
         </ol>
     </nav>
 </div>
