@@ -2,11 +2,20 @@
 
 @section('content')
     <div class="relative z-1 bg-white p-6 sm:p-0 dark:bg-gray-900">
-        <div class="relative flex h-screen w-full flex-col justify-center sm:p-0 lg:flex-row dark:bg-gray-900">
+        <div class="relative flex h-screen w-full flex-col justify-center sm:p-0 dark:bg-gray-900">
             <!-- Form -->
-            <div class="flex w-full flex-1 flex-col lg:w-1/2">
+            <div class="flex w-full flex-1 flex-col">
                 <div class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
                     <div>
+                        <a href="{{ route('signin') }}" class="mb-8 inline-flex items-center gap-3">
+                            <span class="flex size-11 items-center justify-center rounded-xl bg-brand-500 shadow-theme-sm">
+                                <img src="/images/logo/logo-icon.svg" alt="" width="30" height="30" />
+                            </span>
+                            <span class="text-lg font-semibold tracking-tight text-gray-800 dark:text-white/90">
+                                Portal de Eventos
+                            </span>
+                        </a>
+
                         <div class="mb-5 sm:mb-8">
                             <h1 class="text-title-sm sm:text-title-md mb-2 font-semibold text-gray-800 dark:text-white/90">
                                 {{ __('Sign In') }}
@@ -95,20 +104,6 @@
                 </div>
             </div>
 
-            <div class="bg-brand-950 relative hidden h-full w-full items-center lg:grid lg:w-1/2 dark:bg-white/5">
-                <div class="z-1 flex items-center justify-center">
-                    <!-- ===== Common Grid Shape Start ===== -->
-                    <x-common.common-grid-shape/>
-                    <div class="flex max-w-xs flex-col items-center">
-                        <a href="/" class="mb-4 block">
-                            <img src="./images/logo/auth-logo.svg" alt="Logo" />
-                        </a>
-                        <p class="text-center text-gray-400 dark:text-white/60">
-                            {{ __('Free and Open-Source Tailwind CSS Admin Dashboard Template') }}
-                        </p>
-                    </div>
-                </div>
-            </div>
             <!-- Toggler -->
             <div class="fixed right-6 bottom-6 z-50">
                 <button

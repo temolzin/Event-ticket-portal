@@ -34,7 +34,13 @@ it('blocks guests from every protected page', function () {
 });
 
 it('shows the sign-in page to guests', function () {
-    $this->get('/signin')->assertOk();
+    $this->get('/signin')
+        ->assertOk()
+        ->assertSee('Portal de Eventos')
+        ->assertSeeInOrder(['Portal de Eventos', 'Iniciar sesión'])
+        ->assertDontSee('TailAdmin')
+        ->assertDontSee('Free and Open-Source Tailwind CSS Admin Dashboard Template')
+        ->assertDontSee('/images/shape/grid-01.svg');
 });
 
 it('redirects authenticated users away from the sign-in page', function () {
