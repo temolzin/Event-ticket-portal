@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 
 class Ticket extends Model
@@ -147,6 +148,11 @@ class Ticket extends Model
     public function qrPng(): string
     {
         return QrCodeHelper::png($this->code);
+    }
+
+    public function encryptedDownloadKey(): string
+    {
+        return rtrim(strtr(Crypt::encryptString((string) $this->getKey()), '+/', '-_'), '=');
     }
 
     public function wasSent(): bool

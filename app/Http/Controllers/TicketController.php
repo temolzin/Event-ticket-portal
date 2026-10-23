@@ -12,7 +12,9 @@ use App\Models\TicketType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -160,8 +162,22 @@ class TicketController extends Controller
             ->with('status', 'Boleto enviado a '.$ticket->buyer_email.'.');
     }
 
-    public function download(Ticket $ticket): View
+    public function download(string $ticket): View
     {
+        $encryptedId = strtr($ticket, '-_', '+/');
+        $encryptedId .= str_repeat('=', (4 - strlen($encryptedId) % 4) % 4);
+
+        try {
+            $ticketId = Crypt::decryptString($encryptedId);
+        } catch (DecryptException) {
+            abort(404);
+        }
+
+        if (! ctype_digit($ticketId)) {
+            abort(404);
+        }
+
+        $ticket = Ticket::query()->findOrFail((int) $ticketId);
         $this->authorize('view', $ticket);
 
         $ticket->load(['event', 'ticketType']);
