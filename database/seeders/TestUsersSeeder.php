@@ -12,9 +12,8 @@ class TestUsersSeeder extends Seeder
     public function run(): void
     {
         $users = [
-            ['name' => 'Administrador Demo', 'email' => 'admin@eventportal.test', 'role' => UserRole::Admin],
-            ['name' => 'Vendedor Demo', 'email' => 'vendedor@eventportal.test', 'role' => UserRole::Seller],
-            ['name' => 'Gestor Demo', 'email' => 'gestor@eventportal.test', 'role' => UserRole::Manager],
+            ['name' => 'Administrador', 'email' => 'admin@eventportal.test', 'role' => UserRole::Admin],
+            ['name' => 'Vendedor', 'email' => 'vendedor@eventportal.test', 'role' => UserRole::Seller],
         ];
 
         foreach ($users as $user) {
