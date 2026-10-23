@@ -10,17 +10,7 @@ class TicketPricesSeeder extends Seeder
 {
     public function run(): void
     {
-        $event = Event::query()->firstOrCreate(
-            ['name' => 'Nexus Tech'],
-            [
-                'description' => 'Evento interno de Nexus Tech.',
-                'venue' => 'Instalaciones Nexus Tech',
-                'starts_at' => now()->addMonth(),
-                'capacity' => 100,
-                'early_quantity' => 30,
-                'is_active' => true,
-            ]
-        );
+        $event = Event::query()->where('name', 'Nexus Tech')->firstOrFail();
 
         collect([
             ['key' => 'individual', 'name' => 'Boleto individual', 'seats_per_ticket' => 1, 'early_price' => 990, 'regular_price' => 1500],
