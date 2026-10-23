@@ -77,7 +77,7 @@ it('lets the admin and the seller manage tickets', function (UserRole $role) {
     $this->get('/tickets/create')->assertOk();
     $this->get("/tickets/{$ticket->id}")->assertOk();
     $this->get("/tickets/{$ticket->id}/edit")->assertOk();
-    $this->get("/tickets/{$ticket->id}/download")->assertOk();
+    $this->get(route('tickets.download', ['ticket' => $ticket->encryptedDownloadKey()]))->assertOk();
     $this->post("/tickets/{$ticket->id}/send")->assertRedirect(route('tickets.show', $ticket));
 })->with([
     'admin' => UserRole::Admin,
@@ -94,7 +94,7 @@ it('blocks the manager from every ticket page', function () {
     $this->get("/tickets/{$ticket->id}")->assertForbidden();
     $this->get("/tickets/{$ticket->id}/edit")->assertForbidden();
     $this->post("/tickets/{$ticket->id}/send")->assertForbidden();
-    $this->get("/tickets/{$ticket->id}/download")->assertForbidden();
+    $this->get(route('tickets.download', ['ticket' => $ticket->encryptedDownloadKey()]))->assertForbidden();
 });
 
 it('lets only the admin cancel a ticket', function () {

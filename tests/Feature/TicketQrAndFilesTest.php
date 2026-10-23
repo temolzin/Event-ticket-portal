@@ -68,11 +68,38 @@ it('renders the printable ticket with the qr code', function () {
     $ticket = qrTicket(seller: $seller);
 
     $this->actingAs($seller)
-        ->get("/tickets/{$ticket->id}/download")
+        ->get(route('tickets.download', ['ticket' => $ticket->encryptedDownloadKey()]))
         ->assertOk()
         ->assertSee('<svg', false)
         ->assertSee($ticket->code)
         ->assertSee($ticket->buyer_name);
+});
+
+it('does not expose the ticket id in the printable ticket url', function () {
+    $seller = qrSeller();
+    $ticket = qrTicket(seller: $seller);
+
+    $response = $this->actingAs($seller)
+        ->get(route('tickets.show', $ticket))
+        ->assertOk()
+        ->assertDontSee("/tickets/{$ticket->id}/download");
+
+    $downloadLinkFound = preg_match('#href="([^"]*/tickets/([^"/]+)/download)"#', $response->getContent(), $matches);
+
+    expect($downloadLinkFound)->toBe(1);
+    expect($matches[2])->not->toBe((string) $ticket->id);
+
+    $this->actingAs($seller)
+        ->get($matches[1])
+        ->assertOk();
+});
+
+it('rejects an invalid encrypted printable ticket id', function () {
+    $seller = qrSeller();
+
+    $this->actingAs($seller)
+        ->get(route('tickets.download', ['ticket' => 'invalid-token']))
+        ->assertNotFound();
 });
 
 it('serves the buyer photo only to the seller and the admin', function () {
