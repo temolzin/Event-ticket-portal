@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="relative z-1 bg-white p-6 sm:p-0 dark:bg-gray-900">
-        <div class="relative flex h-screen w-full flex-col justify-center sm:p-0 dark:bg-gray-900">
+        <div class="relative flex min-h-screen w-full flex-col justify-center py-8 sm:py-0 dark:bg-gray-900">
             <!-- Form -->
             <div class="flex w-full flex-1 flex-col">
                 <div class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">

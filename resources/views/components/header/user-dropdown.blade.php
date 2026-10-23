@@ -13,7 +13,7 @@
         type="button"
         @click="toggleDropdown()"
     >
-        <span class="block me-1 font-medium text-theme-sm">{{ auth()->user()->name }}</span>
+        <span class="me-1 block max-w-[8rem] truncate font-medium text-theme-sm sm:max-w-[12rem]">{{ auth()->user()->name }}</span>
 
         <!-- Chevron Down Icon -->
         <svg
