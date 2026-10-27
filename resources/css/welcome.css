@@ -115,8 +115,9 @@ p {
 
 section[id],
 aside[id],
-#registro,
-#precios {
+#register,
+#campaign,
+#benefits {
     scroll-margin-top: 18px;
 }
 

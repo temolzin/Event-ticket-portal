@@ -5,6 +5,7 @@ use App\Http\Controllers\BadgeController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventLeadController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('pages.welcome');
 })->name('home');
+
+Route::post('/event-leads', [EventLeadController::class, 'store'])->name('event-leads.store');
 
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
     ->middleware('auth')

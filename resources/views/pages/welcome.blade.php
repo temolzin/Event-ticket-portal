@@ -4,6 +4,7 @@
     <head>
         <meta charset="utf-8" />
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>
         Nexus Tech 2027 — IA, Ciberseguridad y Automatización | Root Heim
         </title>
@@ -80,9 +81,9 @@
         </symbol>
         </svg>
 
-        <a class="skip" href="#contenido">Saltar al contenido</a>
+        <a class="skip" href="#content">Skip to content</a>
 
-        <main id="contenido" tabindex="-1">
+        <main id="content" tabindex="-1">
         <!-- HERO · LOGO, TÍTULO, SUBTÍTULO, IMAGEN, FORMULARIO Y CTA -->
         <section class="hero" id="inicio">
             <div aria-hidden="true" class="hero__bg"></div>
@@ -147,7 +148,8 @@
                 style="--d: 150ms"
             >
 
-                <form class="reg-form" id="registro" data-form="regForm">
+                <form class="reg-form" id="register" data-form="registerForm">
+                @csrf
                 <div class="reg-form__head">
                     <div>
                     <p class="reg-form__kicker">Registro</p>
@@ -157,11 +159,11 @@
 
                 <div class="reg-form__grid">
                     <div class="field">
-                    <label for="nombre">Nombre completo</label>
+                    <label for="name">Nombre completo</label>
                     <input
                         autocomplete="name"
-                        id="nombre"
-                        name="nombre"
+                        id="name"
+                        name="name"
                         placeholder="Nombre y apellido"
                         required
                         type="text"
@@ -169,11 +171,11 @@
                     </div>
 
                     <div class="field">
-                    <label for="empresa">Empresa</label>
+                    <label for="company">Empresa</label>
                     <input
                         autocomplete="organization"
-                        id="empresa"
-                        name="empresa"
+                        id="company"
+                        name="company"
                         placeholder="Razón social o marca"
                         required
                         type="text"
@@ -182,24 +184,26 @@
 
                     <div class="form-row">
                     <div class="field">
-                        <label for="correo">Correo corporativo</label>
+                        <label for="email">Correo corporativo</label>
                         <input
                         autocomplete="email"
-                        id="correo"
-                        name="correo"
+                        id="email"
+                        name="email"
                         placeholder="nombre@empresa.com"
                         required
                         type="email"
                         />
                     </div>
                     <div class="field">
-                        <label for="whatsapp">WhatsApp</label>
+                        <label for="phone">Teléfono</label>
                         <input
                         autocomplete="tel"
-                        id="whatsapp"
-                        inputmode="tel"
-                        name="whatsapp"
-                        placeholder="55 0000 0000"
+                        id="phone"
+                        inputmode="numeric"
+                        maxlength="10"
+                        pattern="[0-9]{10}"
+                        name="phone"
+                        placeholder="5512345678"
                         required
                         type="tel"
                         />
@@ -207,16 +211,16 @@
                     </div>
 
                     <div class="field">
-                    <label for="pase">Pase de interés</label>
+                    <label for="ticket_type">Pase de interés</label>
                     <div class="select-wrap">
-                        <select id="pase" name="pase" required>
+                        <select id="ticket_type" name="ticket_type" required>
                         <option disabled selected value="">
                             Selecciona una opción
                         </option>
-                        <option>Individual · $990 MXN</option>
-                        <option>Dupla · $1,800 MXN</option>
-                        <option>Individual estándar · $1,500 MXN</option>
-                        <option>Dupla ejecutiva estándar · $2,600 MXN</option>
+                        <option value="individual_launch">Individual · $990 MXN</option>
+                        <option value="duo_launch">Dupla · $1,800 MXN</option>
+                        <option value="individual_standard">Individual estándar · $1,500 MXN</option>
+                        <option value="duo_executive_standard">Dupla ejecutiva estándar · $2,600 MXN</option>
                         </select>
                         <svg aria-hidden="true" class="icon">
                         <use href="#i-arrow"></use>
@@ -226,16 +230,12 @@
                 </div>
 
                 <button class="btn btn--primary btn--wide" type="submit">
-                    <!-- Reservar por WhatsApp -->
-                    Enviar correo
-                    <svg aria-hidden="true" class="icon icon--fill">
-                    <!-- <use href="#i-whatsapp"></use> -->
-                    <use href="#i-email"></use>
+                    Enviar registro
+                    <svg aria-hidden="true" class="icon">
+                    <use href="#i-mail"></use>
                     </svg>
                 </button>
                 <p class="form-note">
-                    <!-- Al enviar se abrirá WhatsApp con tus datos. Solo se usan para
-                    coordinar tu registro. -->
                     Tus datos se usan únicamente para coordinar tu registro. No se comparten con terceros.
                 </p>
                 <p
@@ -250,7 +250,7 @@
         </section>
 
         <!-- 07 · CAMPAIGN -->
-        <section class="campaign" id="campana">
+        <section class="campaign" id="campaign">
             <div aria-hidden="true" class="marquee">
             <div class="marquee__track">
                 <div class="marquee__group">
@@ -334,7 +334,7 @@
         </section>
 
         <!-- 08 · BENEFICIOS Y PRECIOS -->
-        <section class="benefits" id="beneficios">
+        <section class="benefits" id="benefits">
             <div class="container">
             <div class="section-head reveal">
                 <p class="eyebrow eyebrow--dark">
@@ -436,9 +436,9 @@
                 <span>Nexus Tech 2027</span>
             </a>
             <nav aria-label="Navegación del pie de página" class="footer__nav">
-                <a href="#registro">Inscripción</a>
-                <a href="#campana">Campaña</a>
-                <a href="#beneficios">Beneficios</a>
+                <a href="#register">Inscripción</a>
+                <a href="#campaign">Campaña</a>
+                <a href="#benefits">Beneficios</a>
             </nav>
             </div>
             <div class="footer__bottom">
@@ -537,46 +537,82 @@
             tick();
             window.setInterval(tick, 1000);
 
-            const form = $('[data-form="regForm"]');
+            const form = $('[data-form="registerForm"]');
             const status = $("#formStatus");
+            const phoneInput = $("#phone");
+
+            const onlyNumbers = (value) => value.replace(/[^0-9]/g, "").slice(0, 10);
+
+            if (phoneInput) {
+                phoneInput.setAttribute("maxlength", "10");
+                phoneInput.addEventListener("input", () => {
+                    phoneInput.value = onlyNumbers(phoneInput.value);
+                });
+            }
+
             if (form) {
-            form.addEventListener("submit", (event) => {
-                event.preventDefault();
-                if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-                }
+                form.addEventListener("submit", async (event) => {
+                    event.preventDefault();
 
-                const data = new FormData(form);
-                const message = [
-                "Hola Root Heim, quiero reservar mi lugar en Nexus Tech 2027.",
-                "",
-                `Nombre: ${data.get("nombre")}`,
-                `Empresa: ${data.get("empresa")}`,
-                `Correo: ${data.get("correo")}`,
-                `WhatsApp: ${data.get("whatsapp")}`,
-                `Pase: ${data.get("pase")}`,
-                "",
-                "¿Me comparten disponibilidad y datos de pago?",
-                ].join("\n");
+                    if (!form.checkValidity()) {
+                        form.reportValidity();
+                        return;
+                    }
 
-                if (status) {
-                status.textContent = "Abriendo WhatsApp con tu solicitud…";
-                }
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    const originalButtonText = submitButton ? submitButton.innerHTML : null;
 
-                window.open(
-                `https://wa.me/5215619660990?text=${encodeURIComponent(message)}`,
-                "_blank",
-                "noopener,noreferrer",
-                );
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = "Enviando...";
 
-                window.setTimeout(() => {
-                if (status) {
-                    status.textContent =
-                    "Si WhatsApp no abrió, escríbenos a info@rootheim.com.";
-                }
-                }, 2200);
-            });
+                    status.textContent = "";
+
+                    const data = new FormData(form);
+                    const token = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                    let response;
+                    try {
+                        response = await fetch("{{ route('event-leads.store') }}", {
+                            method: "POST",
+                            headers: {
+                                "X-CSRF-TOKEN": token,
+                                Accept: "application/json",
+                            },
+                            body: data,
+                        });
+                    } catch (error) {
+                        status.textContent = "Hubo un error al enviar tu registro. Intenta nuevamente.";
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalButtonText;
+                        return;
+                    }
+
+                    if (response.ok) {
+                        status.textContent = "Registro enviado correctamente. Nos pondremos en contacto contigo.";
+                        form.reset();
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalButtonText;
+                        return;
+                    }
+
+                    let errorMessage = "Hubo un error al enviar tu registro. Intenta nuevamente.";
+
+                    try {
+                        const errorData = await response.json();
+                        const hasMessage = errorData && errorData.message;
+                        const hasErrors = errorData && errorData.errors;
+                        const errorsValues = hasErrors ? Object.values(errorData.errors) : [];
+                        const firstError = errorsValues.length ? errorsValues[0] : null;
+                        const firstErrorMessage = Array.isArray(firstError) && firstError[0] ? firstError[0] : null;
+
+                        errorMessage = hasMessage ? errorData.message : firstErrorMessage ? firstErrorMessage : errorMessage;
+                    } catch (e) {
+                    }
+
+                    status.textContent = errorMessage;
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonText;
+                });
             }
         })();
         </script>
