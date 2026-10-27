@@ -35,6 +35,57 @@ export function initCheckInScanner() {
         message.className = TONES[tone] ?? TONES.info;
     };
 
+    const showErrorResult = (title, description) => {
+        const panel = document.createElement('div');
+        panel.className = 'overflow-hidden rounded-2xl border border-error-200 bg-error-50 dark:border-error-500/30 dark:bg-error-500/10';
+        panel.setAttribute('role', 'alert');
+
+        const content = document.createElement('div');
+        content.className = 'px-6 py-8 text-center';
+
+        const icon = document.createElement('span');
+        icon.className = 'mx-auto flex size-20 items-center justify-center rounded-full bg-error-500 text-white';
+        icon.setAttribute('aria-hidden', 'true');
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'size-10');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('stroke-width', '2.5');
+        svg.setAttribute('viewBox', '0 0 24 24');
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        path.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+        svg.append(path);
+        icon.append(svg);
+
+        const heading = document.createElement('h2');
+        heading.className = 'mt-5 text-2xl font-bold text-error-700 dark:text-error-400';
+        heading.textContent = title;
+
+        const detail = document.createElement('p');
+        detail.className = 'mt-2 text-sm text-error-700 dark:text-error-300';
+        detail.textContent = description;
+
+        content.append(icon, heading, detail);
+
+        const footer = document.createElement('div');
+        footer.className = 'border-t border-gray-900/5 px-6 py-4 dark:border-white/10';
+
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.dataset.checkInReset = '';
+        retry.className = 'inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 py-3.5 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600';
+        retry.textContent = root.dataset.tryAgainLabel;
+        footer.append(retry);
+
+        panel.append(content, footer);
+        result.replaceChildren(panel);
+        result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
     const stopScanner = async () => {
         if (!scanner) {
             return;
@@ -127,20 +178,31 @@ export function initCheckInScanner() {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
+                    Accept: 'application/json',
                     'X-CSRF-TOKEN': csrf,
                 },
                 body,
             });
 
             if (response.redirected) {
-                result.innerHTML = '';
-                tell('No se pudo validar el código capturado. Escríbelo manualmente.', 'error');
+                showErrorResult(root.dataset.validationErrorTitle, root.dataset.validationErrorDescription);
+                tell('No se pudo validar el código capturado.', 'error');
+                return;
+            }
+
+            if (!response.ok) {
+                const invalidCode = response.status === 422;
+                showErrorResult(
+                    invalidCode ? root.dataset.invalidQrTitle : root.dataset.validationErrorTitle,
+                    invalidCode ? root.dataset.invalidQrDescription : root.dataset.validationErrorDescription
+                );
                 return;
             }
 
             result.innerHTML = await response.text();
             result.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } catch (error) {
+            showErrorResult(root.dataset.validationErrorTitle, root.dataset.validationErrorDescription);
             tell('No se pudo enviar el código al servidor.', 'error');
         } finally {
             busy = false;

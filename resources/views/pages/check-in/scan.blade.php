@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('content')
     <x-common.page-breadcrumb pageTitle="Check-in" />
@@ -9,6 +9,11 @@
         class="mx-auto max-w-2xl"
         data-check-in
         data-store-url="{{ route('check-in.store') }}"
+        data-invalid-qr-title="{{ __('Invalid or unknown QR code') }}"
+        data-invalid-qr-description="{{ __('The scanned QR code does not match a registered ticket. Check the QR code or enter the ticket code manually.') }}"
+        data-validation-error-title="{{ __('Unable to validate QR code') }}"
+        data-validation-error-description="{{ __('An unexpected error occurred while validating this code. Please try again.') }}"
+        data-try-again-label="{{ __('Scan another ticket') }}"
     >
         <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
             <div class="flex flex-wrap items-start justify-between gap-3">

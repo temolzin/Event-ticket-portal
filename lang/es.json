@@ -192,5 +192,10 @@
     "auth.failed": "Las credenciales no coinciden con nuestros registros.",
     "validation.email_required": "El correo es obligatorio.",
     "validation.email_invalid": "Introduce un correo electrónico válido.",
-    "validation.password_required": "La contraseña es obligatoria."
+    "validation.password_required": "La contraseña es obligatoria.",
+    "Invalid or unknown QR code": "Error: QR inválido o desconocido",
+    "The scanned QR code does not match a registered ticket. Check the QR code or enter the ticket code manually.": "El QR escaneado no corresponde a un boleto registrado. Verifica el QR o escribe manualmente el código del boleto.",
+    "Unable to validate QR code": "No se pudo validar el QR",
+    "An unexpected error occurred while validating this code. Please try again.": "Ocurrió un problema al validar este código. Inténtalo de nuevo.",
+    "Scan another ticket": "Escanear otro boleto"
 }

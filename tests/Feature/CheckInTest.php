@@ -110,7 +110,9 @@ it('denies the access when the ticket was already used', function () {
 });
 
 it('denies the access when the code does not exist', function () {
-    $this->actingAs(checkInManager())
+    $manager = checkInManager();
+
+    $this->actingAs($manager)
         ->post('/check-in', ['code' => 'CODIGO-QUE-NO-EXISTE'])
         ->assertRedirect();
 
@@ -119,6 +121,11 @@ it('denies the access when the code does not exist', function () {
     expect($scan->result)->toBe(ScanResult::NotFound)
         ->and($scan->ticket_id)->toBeNull()
         ->and($scan->code)->toBe('CODIGO-QUE-NO-EXISTE');
+
+    $this->actingAs($manager)
+        ->get(route('check-in.result', $scan))
+        ->assertOk()
+        ->assertSee(__('Invalid or unknown QR code'));
 });
 
 it('only allows the first scan of the same ticket', function () {
@@ -153,6 +160,27 @@ it('returns the result panel to the camera scanner', function () {
         ->assertOk()
         ->assertSee('Acceso permitido')
         ->assertDontSee('<html');
+});
+
+it('shows a designed error panel when an unknown QR code is scanned', function () {
+    $this->actingAs(checkInManager())
+        ->post('/check-in', ['code' => 'QR-DESCONOCIDO'], ['X-Requested-With' => 'XMLHttpRequest'])
+        ->assertOk()
+        ->assertSee(__('Invalid or unknown QR code'))
+        ->assertSee(__('Scan another ticket'))
+        ->assertSee('border-error-200');
+});
+
+it('rejects malformed QR codes that exceed the supported length', function () {
+    $this->actingAs(checkInManager())
+        ->post('/check-in', ['code' => str_repeat('X', 41)], [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Accept' => 'application/json',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('code');
+
+    expect(Scan::query()->count())->toBe(0);
 });
 
 it('requires a code to validate', function () {
