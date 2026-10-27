@@ -5,12 +5,19 @@ use App\Http\Controllers\BadgeController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventLeadController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\TicketTypeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return view('pages.welcome');
+})->name('home');
+
+Route::post('/event-leads', [EventLeadController::class, 'store'])->name('event-leads.store');
 
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
     ->middleware('auth')
@@ -28,7 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'updateName'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
-    Route::get('/', [DashboardController::class, 'showDashboard'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'showDashboard'])->name('dashboard');
 
     Route::get('/profile', function () {
         return view('pages.profile', ['title' => 'Perfil']);
