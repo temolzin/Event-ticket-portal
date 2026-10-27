@@ -26,7 +26,10 @@ class EventLeadController extends Controller
             ], 422);
         }
 
-        EventLead::create($validator->validated());
+        $validated = $validator->validated();
+        $validated['event'] = 'Nexus tech';
+
+        EventLead::create($validated);
 
         return response()->json([
             'success' => true,

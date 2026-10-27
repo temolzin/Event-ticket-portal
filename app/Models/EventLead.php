@@ -16,5 +16,6 @@ class EventLead extends Model
         'email',
         'phone',
         'ticket_type',
+        'event',
     ];
 }
