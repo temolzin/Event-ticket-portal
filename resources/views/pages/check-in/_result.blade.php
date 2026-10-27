@@ -1,5 +1,6 @@
 @php
     $allowed = $scan->result->isAllowed();
+    $unknownCode = in_array($scan->result, [\App\Enums\ScanResult::Invalid, \App\Enums\ScanResult::NotFound], true);
     $ticket = $scan->ticket;
 @endphp
 
@@ -18,7 +19,7 @@
         </span>
 
         <h2 class="mt-5 text-2xl font-bold {{ $allowed ? 'text-success-700 dark:text-success-400' : 'text-error-700 dark:text-error-400' }}">
-            {{ $allowed ? 'Acceso permitido' : 'Acceso denegado' }}
+            {{ $allowed ? 'Acceso permitido' : ($unknownCode ? __('Invalid or unknown QR code') : 'Acceso denegado') }}
         </h2>
 
         <p class="mt-2 text-sm {{ $allowed ? 'text-success-700 dark:text-success-300' : 'text-error-700 dark:text-error-300' }}">
@@ -70,7 +71,7 @@
             data-check-in-reset
             class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 py-3.5 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600"
         >
-            Escanear otro boleto
+            {{ __('Scan another ticket') }}
         </a>
     </div>
 </div>

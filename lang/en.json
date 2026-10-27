@@ -150,5 +150,10 @@
     "auth.failed": "These credentials do not match our records.",
     "validation.email_required": "The email field is required.",
     "validation.email_invalid": "Enter a valid email address.",
-    "validation.password_required": "The password field is required."
+    "validation.password_required": "The password field is required.",
+    "Invalid or unknown QR code": "Invalid or unknown QR code",
+    "The scanned QR code does not match a registered ticket. Check the QR code or enter the ticket code manually.": "The scanned QR code does not match a registered ticket. Check the QR code or enter the ticket code manually.",
+    "Unable to validate QR code": "Unable to validate QR code",
+    "An unexpected error occurred while validating this code. Please try again.": "An unexpected error occurred while validating this code. Please try again.",
+    "Scan another ticket": "Scan another ticket"
 }
