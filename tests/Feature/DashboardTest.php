@@ -76,7 +76,7 @@ it('shows active event capacity and daily check-in metrics to admins', function 
     ]);
 
     $this->actingAs($admin)
-        ->get('/')
+        ->get(route('dashboard'))
         ->assertOk()
         ->assertSee('Dashboard Event')
         ->assertDontSee('Inactive Event')
@@ -115,7 +115,7 @@ it('shows a seller their own sales alongside global event capacity', function ()
     ]);
 
     $this->actingAs($seller)
-        ->get('/')
+        ->get(route('dashboard'))
         ->assertOk()
         ->assertSee('Tus boletos vendidos')
         ->assertSee('2 / 20')
@@ -151,7 +151,7 @@ it('limits manager dashboard check-in activity to their own scans', function () 
     ]);
 
     $this->actingAs($manager)
-        ->get('/')
+        ->get(route('dashboard'))
         ->assertOk()
         ->assertSee('MY-DASHBOARD-SCAN')
         ->assertDontSee('OTHER-MANAGER-SCAN')
@@ -162,13 +162,52 @@ it('limits manager dashboard check-in activity to their own scans', function () 
         ->assertSee('Ver bitácora de escaneos');
 });
 
+it('groups recent dashboard check-in activity by event including unknown scans', function () {
+    $admin = createDashboardUser(UserRole::Admin);
+    $firstEvent = createDashboardEvent(['name' => 'Evento Dashboard Uno']);
+    $secondEvent = createDashboardEvent(['name' => 'Evento Dashboard Dos']);
+    $firstTicket = Ticket::factory()->create(['event_id' => $firstEvent->id]);
+    $secondTicket = Ticket::factory()->create(['event_id' => $secondEvent->id]);
+
+    Scan::create([
+        'ticket_id' => $firstTicket->id,
+        'manager_id' => $admin->id,
+        'code' => 'DASHBOARD-EVENT-ONE',
+        'result' => ScanResult::Valid,
+    ]);
+    Scan::create([
+        'ticket_id' => $secondTicket->id,
+        'manager_id' => $admin->id,
+        'code' => 'DASHBOARD-EVENT-TWO',
+        'result' => ScanResult::Valid,
+    ]);
+    Scan::create([
+        'ticket_id' => null,
+        'manager_id' => $admin->id,
+        'code' => 'DASHBOARD-UNKNOWN-EVENT',
+        'result' => ScanResult::NotFound,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertSeeInOrder([
+            'Evento Dashboard Uno',
+            'DASHBOARD-EVENT-ONE',
+            'Evento Dashboard Dos',
+            'DASHBOARD-EVENT-TWO',
+            __('Unknown event'),
+            'DASHBOARD-UNKNOWN-EVENT',
+        ]);
+});
+
 it('shows an empty state when there are no active upcoming events', function () {
     $admin = createDashboardUser(UserRole::Admin);
     createDashboardEvent(['is_active' => false]);
     createDashboardEvent(['starts_at' => now()->subDays(3)]);
 
     $this->actingAs($admin)
-        ->get('/')
+        ->get(route('dashboard'))
         ->assertOk()
         ->assertSee('Aún no hay eventos activos');
 });

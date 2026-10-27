@@ -3,6 +3,7 @@
 use App\Enums\ScanResult;
 use App\Enums\TicketStatus;
 use App\Enums\UserRole;
+use App\Models\Event;
 use App\Models\Scan;
 use App\Models\Ticket;
 use App\Models\User;
@@ -205,6 +206,45 @@ it('logs every attempt', function () {
         ->assertSee('OTRO-CODIGO')
         ->assertSee('Accesos permitidos')
         ->assertSee('Accesos denegados');
+});
+
+it('groups scan log entries by event and keeps unknown codes together', function () {
+    $manager = checkInManager();
+    $firstEvent = Event::factory()->create(['name' => 'Evento Uno']);
+    $secondEvent = Event::factory()->create(['name' => 'Evento Dos']);
+    $firstTicket = checkInTicket(['event_id' => $firstEvent->id]);
+    $secondTicket = checkInTicket(['event_id' => $secondEvent->id]);
+
+    Scan::create([
+        'ticket_id' => $firstTicket->id,
+        'manager_id' => $manager->id,
+        'code' => 'CODIGO-EVENTO-UNO',
+        'result' => ScanResult::Valid,
+    ]);
+    Scan::create([
+        'ticket_id' => $secondTicket->id,
+        'manager_id' => $manager->id,
+        'code' => 'CODIGO-EVENTO-DOS',
+        'result' => ScanResult::Valid,
+    ]);
+    Scan::create([
+        'ticket_id' => null,
+        'manager_id' => $manager->id,
+        'code' => 'CODIGO-SIN-EVENTO',
+        'result' => ScanResult::NotFound,
+    ]);
+
+    $this->actingAs($manager)
+        ->get(route('check-in.log'))
+        ->assertOk()
+        ->assertSeeInOrder([
+            'Evento Dos',
+            'CODIGO-EVENTO-DOS',
+            'Evento Uno',
+            'CODIGO-EVENTO-UNO',
+            __('Unknown event'),
+            'CODIGO-SIN-EVENTO',
+        ]);
 });
 
 it('filters the log by result', function () {

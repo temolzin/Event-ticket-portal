@@ -131,44 +131,62 @@
                     <thead class="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
                         <tr>
                             <th class="px-5 py-3 text-start text-xs font-medium uppercase text-gray-500 dark:text-gray-400">{{ __('Activity') }}</th>
-                            <th class="px-5 py-3 text-start text-xs font-medium uppercase text-gray-500 dark:text-gray-400">{{ __('Event') }}</th>
+                            @if($isSeller)
+                                <th class="px-5 py-3 text-start text-xs font-medium uppercase text-gray-500 dark:text-gray-400">{{ __('Event') }}</th>
+                            @endif
                             <th class="px-5 py-3 text-start text-xs font-medium uppercase text-gray-500 dark:text-gray-400">{{ $isSeller ? __('Buyer') : __('Scanned by') }}</th>
                             <th class="px-5 py-3 text-start text-xs font-medium uppercase text-gray-500 dark:text-gray-400">{{ __('Status') }}</th>
                             <th class="px-5 py-3 text-end text-xs font-medium uppercase text-gray-500 dark:text-gray-400">{{ __('Date and time') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                        @forelse($activity as $activityItem)
-                            @php
-                                $activityTone = match ($activityItem['tone']) {
-                                    'success' => 'success',
-                                    'blue' => 'primary',
-                                    'warning' => 'warning',
-                                    default => 'error',
-                                };
-                            @endphp
-                            <tr>
-                                <td class="px-5 py-4">
-                                    <a
-                                        href="{{ $activityItem['url'] }}"
-                                        class="font-mono text-sm font-medium text-brand-600 hover:underline dark:text-brand-400"
-                                    >
-                                        {{ $activityItem['detail'] }}
-                                    </a>
-                                    <span class="mt-1 block text-xs text-gray-500 dark:text-gray-400">{{ $activityItem['reference'] }}</span>
-                                </td>
-                                <td class="px-5 py-4 text-sm text-gray-700 dark:text-gray-300">{{ $activityItem['event'] }}</td>
-                                <td class="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $activityItem['actor'] }}</td>
-                                <td class="px-5 py-4">
-                                    <x-ui.badge :color="$activityTone" size="sm">{{ $activityItem['status'] }}</x-ui.badge>
-                                </td>
-                                <td class="px-5 py-4 text-end text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $activityItem['occurredAt']->translatedFormat('d M Y, H:i') }}
-                                </td>
-                            </tr>
+                        @php
+                            $activityGroups = $isSeller
+                                ? collect([$activity])
+                                : $activity->groupBy('eventGroup')->sortKeys();
+                        @endphp
+                        @forelse($activityGroups as $eventActivity)
+                            @unless($isSeller)
+                                <tr class="bg-gray-50 dark:bg-white/[0.02]">
+                                    <th colspan="4" class="px-5 py-3 text-start text-sm font-semibold text-gray-800 dark:text-white/90">
+                                        {{ $eventActivity->first()['event'] }}
+                                    </th>
+                                </tr>
+                            @endunless
+                            @foreach($eventActivity as $activityItem)
+                                @php
+                                    $activityTone = match ($activityItem['tone']) {
+                                        'success' => 'success',
+                                        'blue' => 'primary',
+                                        'warning' => 'warning',
+                                        default => 'error',
+                                    };
+                                @endphp
+                                <tr>
+                                    <td class="px-5 py-4">
+                                        <a
+                                            href="{{ $activityItem['url'] }}"
+                                            class="font-mono text-sm font-medium text-brand-600 hover:underline dark:text-brand-400"
+                                        >
+                                            {{ $activityItem['detail'] }}
+                                        </a>
+                                        <span class="mt-1 block text-xs text-gray-500 dark:text-gray-400">{{ $activityItem['reference'] }}</span>
+                                    </td>
+                                    @if($isSeller)
+                                        <td class="px-5 py-4 text-sm text-gray-700 dark:text-gray-300">{{ $activityItem['event'] }}</td>
+                                    @endif
+                                    <td class="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $activityItem['actor'] }}</td>
+                                    <td class="px-5 py-4">
+                                        <x-ui.badge :color="$activityTone" size="sm">{{ $activityItem['status'] }}</x-ui.badge>
+                                    </td>
+                                    <td class="px-5 py-4 text-end text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $activityItem['occurredAt']->translatedFormat('d M Y, H:i') }}
+                                    </td>
+                                </tr>
+                            @endforeach
                         @empty
                             <tr>
-                                <td colspan="5" class="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                                <td colspan="{{ $isSeller ? 5 : 4 }}" class="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                                     {{ $isSeller ? __('No recent ticket activity.') : __('No recent check-in activity.') }}
                                 </td>
                             </tr>
