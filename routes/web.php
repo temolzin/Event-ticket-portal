@@ -12,6 +12,10 @@ use App\Http\Controllers\TicketTypeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/', function () {
+    return view('pages.welcome');
+})->name('home');
+
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
     ->middleware('auth')
     ->name('locale.switch');
@@ -28,7 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'updateName'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
-    Route::get('/', [DashboardController::class, 'showDashboard'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'showDashboard'])->name('dashboard');
 
     Route::get('/profile', function () {
         return view('pages.profile', ['title' => 'Perfil']);
