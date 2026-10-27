@@ -99,6 +99,20 @@ it('shows active event capacity and daily check-in metrics to admins', function 
     expect($event->tickets()->whereNotNull('checked_in_at')->count())->toBe(1);
 });
 
+it('links the dashboard menu and sidebar logo to the dashboard route', function () {
+    $admin = createDashboardUser(UserRole::Admin);
+
+    $this->actingAs($admin)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee('href="'.route('dashboard').'"', false)
+        ->assertDontSee('href="/" class="menu-item group"', false);
+
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('Nexus Tech 2027');
+});
+
 it('shows a seller their own sales alongside global event capacity', function () {
     $seller = createDashboardUser(UserRole::Seller);
     $event = createDashboardEvent(['capacity' => 20]);

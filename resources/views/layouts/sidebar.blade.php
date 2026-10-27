@@ -57,7 +57,7 @@
     @mouseleave="$store.sidebar.setHovered(false)">
     <!-- Logo Section -->
     <div class="pt-8 pb-7 flex items-center gap-2" :class="(!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ? 'justify-center' : 'justify-between'">
-        <a href="/">
+        <a href="{{ route('dashboard') }}">
             <div class="hidden [.sidebar-expanded_&]:block">
                 <span class="inline-flex items-center gap-2">
                     <img src="/images/logo/logo-icon.svg" alt="" width="32" height="32" />
