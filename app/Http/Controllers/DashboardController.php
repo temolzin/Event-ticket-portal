@@ -222,6 +222,7 @@ class DashboardController extends Controller
             ->limit(8)
             ->get()
             ->map(fn (Ticket $ticket) => [
+                'eventGroup' => $ticket->event_id,
                 'event' => $ticket->event->name,
                 'detail' => __('Ticket sale'),
                 'reference' => $ticket->code,
@@ -249,6 +250,7 @@ class DashboardController extends Controller
             ->limit(8)
             ->get()
             ->map(fn (Scan $scan) => [
+                'eventGroup' => $scan->ticket?->event_id ?? 'unknown',
                 'event' => $scan->ticket?->event?->name ?? __('Unknown event'),
                 'detail' => $scan->code,
                 'reference' => $scan->ticket?->buyer_name ?? __('Ticket not found'),

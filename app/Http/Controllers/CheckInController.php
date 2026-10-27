@@ -14,9 +14,7 @@ use Illuminate\View\View;
 
 class CheckInController extends Controller
 {
-    public function __construct(private CheckInService $checkIn)
-    {
-    }
+    public function __construct(private CheckInService $checkIn) {}
 
     public function create(): View
     {
@@ -55,13 +53,18 @@ class CheckInController extends Controller
             ->with(['ticket.event', 'manager'])
             ->when(
                 $request->filled('result'),
-                fn ($query) => $query->where('result', $request->string('result')->toString())
+                fn ($query) => $query->where('scans.result', $request->string('result')->toString())
             )
             ->when(
                 $request->filled('code'),
-                fn ($query) => $query->where('code', 'like', '%'.strtoupper(trim($request->string('code')->toString())).'%')
+                fn ($query) => $query->where('scans.code', 'like', '%'.strtoupper(trim($request->string('code')->toString())).'%')
             )
-            ->latest()
+            ->leftJoin('tickets as scanned_tickets', 'scanned_tickets.id', '=', 'scans.ticket_id')
+            ->leftJoin('events as scanned_events', 'scanned_events.id', '=', 'scanned_tickets.event_id')
+            ->select('scans.*')
+            ->orderByRaw('scanned_events.id IS NULL')
+            ->orderBy('scanned_events.name')
+            ->orderByDesc('scans.created_at')
             ->paginate(20)
             ->withQueryString();
 

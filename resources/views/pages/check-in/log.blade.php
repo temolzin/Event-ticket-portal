@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('content')
     <x-common.page-breadcrumb pageTitle="Bitácora de escaneos" />
@@ -53,44 +53,47 @@
 
     <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[880px]">
+            <table class="w-full min-w-[760px]">
                 <thead class="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
                     <tr>
                         <th class="px-5 py-3 text-start text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Fecha y hora</th>
                         <th class="px-5 py-3 text-start text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Resultado</th>
                         <th class="px-5 py-3 text-start text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Código</th>
                         <th class="px-5 py-3 text-start text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Cliente</th>
-                        <th class="px-5 py-3 text-start text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Evento</th>
                         <th class="px-5 py-3 text-end text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Gestor</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                    @forelse($scans as $scan)
-                        <tr>
-                            <td class="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $scan->created_at->format('d/m/Y H:i') }}
-                            </td>
-                            <td class="px-5 py-4">
-                                <x-ui.badge :color="$scan->result->isAllowed() ? 'success' : 'error'" size="sm">
-                                    {{ $scan->result->describe() }}
-                                </x-ui.badge>
-                            </td>
-                            <td class="px-5 py-4 font-mono text-sm text-gray-800 dark:text-white/90">
-                                {{ $scan->code }}
-                            </td>
-                            <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">
-                                {{ $scan->ticket?->buyer_name ?? '—' }}
-                            </td>
-                            <td class="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $scan->ticket?->event->name ?? '—' }}
-                            </td>
-                            <td class="px-5 py-4 text-end text-sm text-gray-500 dark:text-gray-400">
-                                {{ $scan->manager?->name ?? '—' }}
-                            </td>
+                    @forelse($scans->groupBy(fn ($scan) => $scan->ticket?->event_id ?? 'unknown') as $eventScans)
+                        <tr class="bg-gray-50 dark:bg-white/[0.02]">
+                            <th colspan="5" class="px-5 py-3 text-start text-sm font-semibold text-gray-800 dark:text-white/90">
+                                {{ $eventScans->first()->ticket?->event?->name ?? __('Unknown event') }}
+                            </th>
                         </tr>
+                        @foreach($eventScans as $scan)
+                            <tr>
+                                <td class="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ $scan->created_at->format('d/m/Y H:i') }}
+                                </td>
+                                <td class="px-5 py-4">
+                                    <x-ui.badge :color="$scan->result->isAllowed() ? 'success' : 'error'" size="sm">
+                                        {{ $scan->result->describe() }}
+                                    </x-ui.badge>
+                                </td>
+                                <td class="px-5 py-4 font-mono text-sm text-gray-800 dark:text-white/90">
+                                    {{ $scan->code }}
+                                </td>
+                                <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">
+                                    {{ $scan->ticket?->buyer_name ?? '—' }}
+                                </td>
+                                <td class="px-5 py-4 text-end text-sm text-gray-500 dark:text-gray-400">
+                                    {{ $scan->manager?->name ?? '—' }}
+                                </td>
+                            </tr>
+                        @endforeach
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                            <td colspan="5" class="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                                 Todavía no hay escaneos registrados.
                             </td>
                         </tr>

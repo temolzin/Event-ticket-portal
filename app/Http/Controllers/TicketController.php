@@ -9,12 +9,12 @@ use App\Mail\TicketMail;
 use App\Models\Event;
 use App\Models\Ticket;
 use App\Models\TicketType;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -246,6 +246,7 @@ class TicketController extends Controller
         $tickets = Ticket::query()
             ->cancelled()
             ->with(['event', 'ticketType', 'seller'])
+            ->orderBy('event_id')
             ->orderByDesc('id')
             ->paginate(15);
 

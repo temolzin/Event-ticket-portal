@@ -431,6 +431,32 @@ it('moves a cancelled customer out of the active module and into cancelled clien
         ->and(Ticket::query()->whereKey($activeTicket->id)->exists())->toBeTrue();
 });
 
+it('groups cancelled tickets by event', function () {
+    $admin = User::factory()->create(['role' => UserRole::Admin]);
+    $firstEvent = Event::factory()->create(['name' => 'Evento Cancelado Uno']);
+    $secondEvent = Event::factory()->create(['name' => 'Evento Cancelado Dos']);
+    $firstTicket = Ticket::factory()->create([
+        'event_id' => $firstEvent->id,
+        'status' => TicketStatus::Cancelled,
+        'buyer_name' => 'Cliente Uno',
+    ]);
+    $secondTicket = Ticket::factory()->create([
+        'event_id' => $secondEvent->id,
+        'status' => TicketStatus::Cancelled,
+        'buyer_name' => 'Cliente Dos',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('tickets.cancelled'))
+        ->assertOk()
+        ->assertSeeInOrder([
+            'Evento Cancelado Uno',
+            $firstTicket->buyer_name,
+            'Evento Cancelado Dos',
+            $secondTicket->buyer_name,
+        ]);
+});
+
 it('leaves out an event with no sales', function () {
     $seller = saleSeller();
     Event::factory()->create(['name' => 'Evento Sin Ventas']);
