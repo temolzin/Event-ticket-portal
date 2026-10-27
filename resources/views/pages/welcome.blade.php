@@ -152,8 +152,8 @@
                 @csrf
                 <div class="reg-form__head">
                     <div>
-                    <p class="reg-form__kicker">Registro</p>
-                    <h2 id="formTitle">Reserva tu lugar</h2>
+                    <p class="reg-form__kicker">Información</p>
+                    <h2 id="formTitle">Pedir mas información</h2>
                     </div>
                 </div>
 
@@ -230,7 +230,7 @@
                 </div>
 
                 <button class="btn btn--primary btn--wide" type="submit">
-                    Enviar registro
+                    Enviar
                     <svg aria-hidden="true" class="icon">
                     <use href="#i-mail"></use>
                     </svg>
