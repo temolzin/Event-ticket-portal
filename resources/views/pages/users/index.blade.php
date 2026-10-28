@@ -5,7 +5,13 @@
 
     <x-common.flash />
 
-    <div class="mb-5 flex justify-end">
+    <div class="mb-5 flex justify-end gap-3">
+        <a
+            href="{{ route('users.permissions') }}"
+            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-5 py-3.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+        >
+            {{ __('Permissions by role') }}
+        </a>
         <a
             href="{{ route('users.create') }}"
             class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 py-3.5 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600"

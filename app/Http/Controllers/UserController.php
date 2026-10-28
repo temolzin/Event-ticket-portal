@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
+use App\Helpers\PermissionMatrix;
 use App\Http\Requests\SaveUserRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -49,6 +50,15 @@ class UserController extends Controller
         ]);
     }
 
+    public function permissions(): View
+    {
+        return view('pages.users.permissions', [
+            'title' => __('Permissions by role'),
+            'matrix' => PermissionMatrix::groups(),
+            'roles' => PermissionMatrix::roles(),
+        ]);
+    }
+
     public function store(SaveUserRequest $request): RedirectResponse
     {
         User::create($request->getUserAttributes());
@@ -70,12 +80,10 @@ class UserController extends Controller
         $attributes = $request->getUserAttributes();
 
         $error = match (true) {
-            $request->user()->is($user) && $attributes['role'] !== UserRole::Admin->value
-                => __('You cannot change your own administrator role.'),
+            $request->user()->is($user) && $attributes['role'] !== UserRole::Admin->value => __('You cannot change your own administrator role.'),
             $user->isAdmin()
                 && $attributes['role'] !== UserRole::Admin->value
-                && User::query()->where('role', UserRole::Admin)->count() === 1
-                => __('The last administrator cannot be demoted.'),
+                && User::query()->where('role', UserRole::Admin)->count() === 1 => __('The last administrator cannot be demoted.'),
             default => null,
         };
 
@@ -88,10 +96,8 @@ class UserController extends Controller
     {
         $error = match (true) {
             $request->user()->is($user) => __('You cannot delete your own account.'),
-            $user->isAdmin() && User::query()->where('role', UserRole::Admin)->count() === 1
-                => __('The last administrator cannot be deleted.'),
-            $user->tickets()->exists() || $user->scans()->exists()
-                => __('This user has sales or check-in history and cannot be deleted.'),
+            $user->isAdmin() && User::query()->where('role', UserRole::Admin)->count() === 1 => __('The last administrator cannot be deleted.'),
+            $user->tickets()->exists() || $user->scans()->exists() => __('This user has sales or check-in history and cannot be deleted.'),
             default => null,
         };
 
