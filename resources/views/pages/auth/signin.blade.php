@@ -84,6 +84,7 @@
                                                 {{ __('Keep me logged in') }}
                                             </label>
                                         </div>
+                                    </div>
                                     <!-- Button -->
                                     <div>
                                         <button
