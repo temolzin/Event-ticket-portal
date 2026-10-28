@@ -18,15 +18,6 @@
                 autocomplete="name"
             />
 
-            <x-form.input
-                name="email"
-                type="email"
-                :label="__('Email')"
-                :value="$user->email ?? null"
-                required
-                autocomplete="email"
-            />
-
             <x-form.select
                 name="role"
                 :label="__('Role')"
@@ -36,7 +27,16 @@
                 required
             />
 
-            <div class="hidden sm:block"></div>
+            <div class="sm:col-span-2">
+                <x-form.input
+                    name="email"
+                    type="email"
+                    :label="__('Email')"
+                    :value="$user->email ?? null"
+                    required
+                    autocomplete="email"
+                />
+            </div>
 
             <div>
                 <label for="password" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
