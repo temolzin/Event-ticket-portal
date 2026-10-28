@@ -26,11 +26,10 @@ Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
 
 Route::middleware('guest')->group(function () {
     Route::get('/signin', [AuthenticatedSessionController::class, 'create'])->name('signin');
-
-    Route::get('/login', fn () => redirect()->route('signin'));
-
-    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login');
 });
+
+Route::get('/login', [AuthenticatedSessionController::class, 'create']);
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login');
 
 Route::middleware('auth')->group(function () {
 
