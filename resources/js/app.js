@@ -2,6 +2,8 @@ import { createPopper } from '@popperjs/core';
 import './bootstrap';
 import Alpine from 'alpinejs';
 import ApexCharts from 'apexcharts';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 // flatpickr
 import flatpickr from 'flatpickr';
@@ -14,13 +16,45 @@ import { Calendar } from 'fullcalendar';
 window.Alpine = Alpine;
 window.createPopper = createPopper;
 window.ApexCharts = ApexCharts;
+window.Swal = Swal;
 window.flatpickr = flatpickr;
 window.FullCalendar = Calendar;
+window.confirmAction = async (message, options = {}) => {
+    const result = await Swal.fire({
+        title: options.title ?? window.sweetAlertText?.confirmationTitle ?? 'Are you sure?',
+        text: message,
+        icon: options.icon ?? 'warning',
+        showCancelButton: true,
+        confirmButtonText: options.confirmButtonText ?? window.sweetAlertText?.confirm ?? 'Yes, continue',
+        cancelButtonText: options.cancelButtonText ?? window.sweetAlertText?.cancel ?? 'Cancel',
+        reverseButtons: true,
+        focusCancel: true,
+        background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff',
+        color: document.documentElement.classList.contains('dark') ? '#f9fafb' : '#111827',
+    });
+
+    return result.isConfirmed;
+};
 
 Alpine.start();
 
 // Initialize components on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-swal-flash]').forEach((element) => {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: element.dataset.icon,
+            title: element.dataset.title,
+            text: element.dataset.message,
+            showConfirmButton: false,
+            timer: 4500,
+            timerProgressBar: true,
+            background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#f9fafb' : '#111827',
+        });
+    });
+
     // Map imports
     if (document.querySelector('#mapOne')) {
         import('./components/map').then(module => module.initMap());

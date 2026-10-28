@@ -102,7 +102,7 @@
                     action="{{ route('events.destroy', $event) }}"
                     class="flex-1"
                     x-data
-                    @submit.prevent="if (confirm('¿Seguro que quieres eliminar este evento?')) $el.submit()"
+                    @submit.prevent="confirmAction('¿Seguro que quieres eliminar este evento?').then(confirmed => { if (confirmed) $el.submit(); })"
                 >
                     @csrf
                     @method('DELETE')

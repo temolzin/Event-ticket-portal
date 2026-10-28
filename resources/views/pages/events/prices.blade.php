@@ -74,7 +74,7 @@
                                                 method="POST"
                                                 action="{{ route('ticket-types.destroy', [$event, $ticketType]) }}"
                                                 x-data
-                                                @submit.prevent="if (confirm('¿Seguro que quieres eliminar este boleto?')) $el.submit()"
+                                                @submit.prevent="confirmAction('¿Seguro que quieres eliminar este boleto?').then(confirmed => { if (confirmed) $el.submit(); })"
                                             >
                                                 @csrf
                                                 @method('DELETE')
