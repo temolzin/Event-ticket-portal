@@ -257,6 +257,7 @@ it('filters the log by result', function () {
     $this->actingAs($manager)
         ->get('/check-in/log?result=not_found')
         ->assertOk()
+        ->assertSeeInOrder(['value="not_found"', 'selected'], false)
         ->assertSee('OTRO-CODIGO')
         ->assertDontSee($ticket->code);
 });
