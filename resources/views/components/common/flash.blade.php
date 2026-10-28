@@ -1,11 +1,19 @@
 @if(session('status'))
-    <div class="mb-6">
-        <x-ui.alert variant="success" title="Listo" :message="session('status')" />
-    </div>
+    <div
+        hidden
+        data-swal-flash
+        data-icon="success"
+        data-title="Listo"
+        data-message="{{ session('status') }}"
+    ></div>
 @endif
 
 @if($errors->any())
-    <div class="mb-6">
-        <x-ui.alert variant="error" title="Revisa el formulario" :message="$errors->first()" />
-    </div>
+    <div
+        hidden
+        data-swal-flash
+        data-icon="error"
+        data-title="Revisa el formulario"
+        data-message="{{ $errors->first() }}"
+    ></div>
 @endif

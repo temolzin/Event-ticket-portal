@@ -88,7 +88,7 @@
                                         method="POST"
                                         action="{{ route('users.destroy', $user) }}"
                                         x-data
-                                        @submit.prevent="confirm(@js(__('Are you sure you want to delete this user?'))) && $el.submit()"
+                                        @submit.prevent="confirmAction(@js(__('Are you sure you want to delete this user?'))).then(confirmed => { if (confirmed) $el.submit(); })"
                                     >
                                         @csrf
                                         @method('DELETE')

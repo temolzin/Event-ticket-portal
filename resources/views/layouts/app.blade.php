@@ -10,6 +10,13 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        window.sweetAlertText = {
+            confirmationTitle: @js(__('Are you sure?')),
+            confirm: @js(__('Yes, continue')),
+            cancel: @js(__('Cancel')),
+        };
+    </script>
 
     <!-- Theme Store -->
     <style>

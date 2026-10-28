@@ -112,7 +112,8 @@
                                                     method="POST"
                                                     action="{{ route('tickets.destroy', $ticket) }}"
                                                     class="inline"
-                                                    onsubmit="return confirm('¿Cancelar este boleto? El cliente aparecerá en Clientes cancelados.');"
+                                                    x-data
+                                                    @submit.prevent="confirmAction('¿Cancelar este boleto? El cliente aparecerá en Clientes cancelados.', { title: @js(__('Cancel client')), confirmButtonText: @js(__('Yes, cancel')), icon: 'warning' }).then(confirmed => { if (confirmed) $el.submit(); })"
                                                 >
                                                     @csrf
                                                     @method('DELETE')

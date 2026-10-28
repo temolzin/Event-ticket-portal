@@ -250,16 +250,28 @@
 
                                 const result = await response.json();
 
-                                if (result.exists && ! window.confirm(
-                                    'Este cliente aparece en la lista de clientes cancelados. ¿Aun así deseas agregarlo?'
-                                )) {
-                                    return;
+                                if (result.exists) {
+                                    const confirmed = await window.confirmAction(
+                                        'Este cliente aparece en la lista de clientes cancelados. ¿Aun así deseas agregarlo?',
+                                        {
+                                            title: @js(__('Cancelled client')),
+                                            confirmButtonText: @js(__('Yes, add')),
+                                        }
+                                    );
+
+                                    if (! confirmed) {
+                                        return;
+                                    }
                                 }
 
                                 form.elements.confirm_cancelled_client.value = result.exists ? '1' : '0';
                                 form.submit();
                             } catch (error) {
-                                window.alert(error.message);
+                                window.Swal.fire({
+                                    icon: 'error',
+                                    title: @js(__('Could not verify')),
+                                    text: error.message,
+                                });
                             } finally {
                                 this.isCheckingCancelledClient = false;
                             }
