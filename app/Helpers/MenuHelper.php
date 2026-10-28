@@ -44,11 +44,6 @@ class MenuHelper
                 'path' => '/users',
                 'roles' => [UserRole::Admin],
             ],
-            [
-                'icon' => 'user-profile',
-                'name' => 'Profile',
-                'path' => '/profile',
-            ],
         ], fn (array $item) => self::allowsRole($item['roles'] ?? null)));
     }
 
