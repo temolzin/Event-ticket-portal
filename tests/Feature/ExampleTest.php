@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 test('redirects guests away from the dashboard', function () {
-    $this->get('/')->assertStatus(302);
+    $this->get('/dashboard')->assertRedirect(route('signin'));
 });
 
 test('the application returns a successful response for authenticated users', function () {

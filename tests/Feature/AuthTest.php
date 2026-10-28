@@ -22,11 +22,14 @@ function managerUser(): User
     return User::factory()->create(['role' => UserRole::Manager]);
 }
 
-it('redirects guests to the sign-in page', function () {
-    $this->get('/')->assertRedirect(route('signin'));
+it('welcomes guests on the public landing page', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('Nexus Tech');
 });
 
 it('blocks guests from every protected page', function () {
+    $this->get('/dashboard')->assertRedirect(route('signin'));
     $this->get('/events')->assertRedirect(route('signin'));
     $this->get('/tickets')->assertRedirect(route('signin'));
     $this->get('/check-in')->assertRedirect(route('signin'));
