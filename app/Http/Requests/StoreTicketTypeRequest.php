@@ -53,6 +53,8 @@ class StoreTicketTypeRequest extends FormRequest
             'regular_price.max' => 'El precio normal es demasiado grande.',
             'event_id.required' => 'Selecciona el evento.',
             'event_id.exists' => 'El evento seleccionado no existe.',
+            'key.required' => 'Escribe el nombre del boleto.',
+            'key.max' => 'El nombre del boleto no puede pasar de 30 caracteres.',
             'key.unique' => 'Ya existe un boleto con ese nombre en este evento.',
         ];
     }
