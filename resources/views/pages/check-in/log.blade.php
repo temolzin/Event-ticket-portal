@@ -31,6 +31,7 @@
         <x-form.select
             name="result"
             label="Resultado"
+            :value="request('result')"
             :options="$results"
             placeholder="Todos"
             class="w-full sm:w-56"
@@ -39,6 +40,7 @@
         <x-form.input
             name="code"
             label="Código"
+            :value="request('code')"
             placeholder="Buscar por código"
             class="w-full sm:w-72"
         />

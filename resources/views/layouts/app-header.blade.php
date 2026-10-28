@@ -1,5 +1,7 @@
 <header
     class="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 xl:border-b"
+    @keydown.window.ctrl.k.prevent="$refs.searchInput?.focus()"
+    @keydown.window.meta.k.prevent="$refs.searchInput?.focus()"
     x-data="{
         isApplicationMenuOpen: false,
         toggleApplicationMenu() {
@@ -69,7 +71,7 @@
 
             <!-- Search Bar (desktop only) -->
             <div class="hidden xl:block">
-                <form>
+                <form action="{{ route('search') }}" method="GET" role="search">
                     <div class="relative">
                         <span class="absolute -translate-y-1/2 pointer-events-none ltr:left-4 rtl:right-4 top-1/2">
                             <!-- Search Icon -->
@@ -82,7 +84,11 @@
                         </span>
                         <input type="text"
                             x-ref="searchInput"
-                            placeholder="Search or type command..."
+                            name="q"
+                            value="{{ request('q') }}"
+                            aria-label="{{ __('Search') }}"
+                            placeholder="{{ __('Search or type command...') }}"
+                            maxlength="100"
                             class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 ltr:pl-12 ltr:pr-14 rtl:pr-12 rtl:pl-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-white/3 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[430px]" />
                         <button
                             type="button"
