@@ -13,7 +13,7 @@ class TestUsersSeeder extends Seeder
     {
         $users = [
             ['name' => 'Administrador', 'email' => 'admin@eventportal.test', 'role' => UserRole::Admin],
-            ['name' => 'Vendedor', 'email' => 'vendedor@eventportal.test', 'role' => UserRole::Seller],
+            ['name' => 'Gestor', 'email' => 'gestor@eventportal.test', 'role' => UserRole::Manager],
         ];
 
         foreach ($users as $user) {
