@@ -24,7 +24,7 @@
                                 {{ $eventTickets->first()->event->name }}
                             </th>
                         </tr>
-                        @foreach($eventTickets as $ticket)
+                        @foreach($eventTickets->unique(fn ($ticket) => mb_strtolower(trim($ticket->buyer_name)).'|'.mb_strtolower(trim($ticket->buyer_email))) as $ticket)
                             <tr>
                                 <td class="px-5 py-4 text-sm">
                                     <span class="block font-medium text-gray-800 dark:text-white/90">{{ $ticket->buyer_name }}</span>
