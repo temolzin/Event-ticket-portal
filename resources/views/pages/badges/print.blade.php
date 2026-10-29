@@ -294,7 +294,7 @@
                 <div class="badge__main">
                     @if($ticket->buyer_photo_path)
                         <img
-                            src="{{ route('tickets.photo', $ticket) }}"
+                            src="{{ route('tickets.photo', $ticket->encryptedDownloadKey()) }}"
                             alt="{{ __('Photo of :name', ['name' => $ticket->buyer_name]) }}"
                             class="badge__photo"
                         >

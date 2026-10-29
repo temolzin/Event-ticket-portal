@@ -76,7 +76,7 @@
                             <td class="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $ticket->ticketType->name }}</td>
                             <td class="px-5 py-4 text-end">
                                 <a
-                                    href="{{ route('badges.tickets.print', $ticket) }}"
+                                    href="{{ route('badges.tickets.print', $ticket->encryptedDownloadKey()) }}"
                                     target="_blank"
                                     rel="noopener"
                                     class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400"

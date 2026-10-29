@@ -108,7 +108,7 @@ it('serves the buyer photo only to the seller and the admin', function () {
     $seller = qrSeller();
     $ticket = qrTicket(seller: $seller);
 
-    $response = $this->actingAs($seller)->get("/tickets/{$ticket->id}/photo");
+    $response = $this->actingAs($seller)->get("/tickets/{$ticket->encryptedDownloadKey()}/photo");
 
     $response->assertOk();
 
@@ -117,7 +117,7 @@ it('serves the buyer photo only to the seller and the admin', function () {
         ->not->toContain('public');
 
     $this->actingAs(User::factory()->create(['role' => UserRole::Admin]))
-        ->get("/tickets/{$ticket->id}/photo")
+        ->get("/tickets/{$ticket->encryptedDownloadKey()}/photo")
         ->assertOk();
 });
 
@@ -127,7 +127,7 @@ it('serves the payment receipt only to the seller and the admin', function () {
     $seller = qrSeller();
     $ticket = qrTicket(seller: $seller);
 
-    $response = $this->actingAs($seller)->get("/tickets/{$ticket->id}/receipt");
+    $response = $this->actingAs($seller)->get("/tickets/{$ticket->encryptedDownloadKey()}/receipt");
 
     $response->assertOk();
 
@@ -142,11 +142,11 @@ it('keeps a seller out of the files of a sale that belongs to someone else', fun
     $ticket = qrTicket(seller: qrSeller());
 
     $this->actingAs(qrSeller())
-        ->get("/tickets/{$ticket->id}/photo")
+        ->get("/tickets/{$ticket->encryptedDownloadKey()}/photo")
         ->assertForbidden();
 
     $this->actingAs(qrSeller())
-        ->get("/tickets/{$ticket->id}/receipt")
+        ->get("/tickets/{$ticket->encryptedDownloadKey()}/receipt")
         ->assertForbidden();
 });
 
@@ -156,11 +156,11 @@ it('keeps the manager out of the files', function () {
     $ticket = qrTicket();
 
     $this->actingAs(User::factory()->create(['role' => UserRole::Manager]))
-        ->get("/tickets/{$ticket->id}/photo")
+        ->get("/tickets/{$ticket->encryptedDownloadKey()}/photo")
         ->assertForbidden();
 
     $this->actingAs(User::factory()->create(['role' => UserRole::Manager]))
-        ->get("/tickets/{$ticket->id}/receipt")
+        ->get("/tickets/{$ticket->encryptedDownloadKey()}/receipt")
         ->assertForbidden();
 });
 
@@ -169,7 +169,7 @@ it('answers with a not found when the file is missing', function () {
     $ticket = qrTicket(withFiles: false, seller: $seller);
 
     $this->actingAs($seller)
-        ->get("/tickets/{$ticket->id}/photo")
+        ->get("/tickets/{$ticket->encryptedDownloadKey()}/photo")
         ->assertNotFound();
 });
 
@@ -296,7 +296,7 @@ it('lets the buyer photo download as a file for the badge', function () {
     $seller = qrSeller();
     $ticket = qrTicket(seller: $seller);
 
-    $response = $this->actingAs($seller)->get("/tickets/{$ticket->id}/photo/download");
+    $response = $this->actingAs($seller)->get("/tickets/{$ticket->encryptedDownloadKey()}/photo/download");
 
     $response->assertOk();
 
@@ -310,7 +310,7 @@ it('keeps the buyer photo visible inline when it is opened', function () {
     $seller = qrSeller();
     $ticket = qrTicket(seller: $seller);
 
-    $response = $this->actingAs($seller)->get("/tickets/{$ticket->id}/photo");
+    $response = $this->actingAs($seller)->get("/tickets/{$ticket->encryptedDownloadKey()}/photo");
 
     $response->assertOk();
 

@@ -185,8 +185,10 @@ class TicketController extends Controller
         return view('pages.tickets.print', ['title' => 'Boleto', 'ticket' => $ticket]);
     }
 
-    public function buyerPhoto(Ticket $ticket): BinaryFileResponse
+    public function buyerPhoto(string $ticket): BinaryFileResponse
     {
+        $ticket = $this->resolveTicketFromEncryptedKey($ticket);
+
         $this->authorize('view', $ticket);
 
         $path = $ticket->buyerPhotoPath();
@@ -198,8 +200,10 @@ class TicketController extends Controller
         return $this->privateFileResponse($path, 'foto-'.$ticket->code.$this->resolveExtension($path));
     }
 
-    public function buyerPhotoDownload(Ticket $ticket): BinaryFileResponse
+    public function buyerPhotoDownload(string $ticket): BinaryFileResponse
     {
+        $ticket = $this->resolveTicketFromEncryptedKey($ticket);
+
         $this->authorize('view', $ticket);
 
         $path = $ticket->buyerPhotoPath();
@@ -211,8 +215,10 @@ class TicketController extends Controller
         return $this->privateFileResponse($path, 'foto-'.$ticket->code.$this->resolveExtension($path), 'attachment');
     }
 
-    public function paymentReceipt(Ticket $ticket): BinaryFileResponse
+    public function paymentReceipt(string $ticket): BinaryFileResponse
     {
+        $ticket = $this->resolveTicketFromEncryptedKey($ticket);
+
         $this->authorize('view', $ticket);
 
         $path = $ticket->paymentReceiptPath();
@@ -222,6 +228,24 @@ class TicketController extends Controller
         }
 
         return $this->privateFileResponse($path, 'comprobante-'.$ticket->code.$this->resolveExtension($path));
+    }
+
+    private function resolveTicketFromEncryptedKey(string $encryptedKey): Ticket
+    {
+        $encryptedKey = strtr($encryptedKey, '-_', '+/');
+        $encryptedKey .= str_repeat('=', (4 - strlen($encryptedKey) % 4) % 4);
+
+        try {
+            $ticketId = Crypt::decryptString($encryptedKey);
+        } catch (DecryptException) {
+            abort(404);
+        }
+
+        if (! ctype_digit($ticketId)) {
+            abort(404);
+        }
+
+        return Ticket::query()->findOrFail((int) $ticketId);
     }
 
     public function cancel(Ticket $ticket): RedirectResponse

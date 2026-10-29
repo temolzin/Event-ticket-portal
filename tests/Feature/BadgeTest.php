@@ -64,7 +64,7 @@ it('prints every active event badge and excludes cancelled tickets', function ()
         ->assertSee('Active Client')
         ->assertSee('Client Without Photo')
         ->assertDontSee('Cancelled Client')
-        ->assertSee(route('tickets.photo', $activeTicket), false)
+        ->assertDontSee("/tickets/{$activeTicket->id}/photo", false)
         ->assertSee(asset('images/badges/company-logo.png'), false);
 
     $html = $response->getContent();
@@ -169,17 +169,17 @@ it('prints an individual badge for its seller and admin only', function () {
     $ticket = createBadgeTicket($seller, Event::factory()->create());
 
     $this->actingAs($seller)
-        ->get(route('badges.tickets.print', $ticket))
+        ->get(route('badges.tickets.print', $ticket->encryptedDownloadKey()))
         ->assertOk()
         ->assertSee($ticket->buyer_name)
         ->assertSee(asset('images/badges/company-logo.png'), false);
 
     $this->actingAs(badgeSeller())
-        ->get(route('badges.tickets.print', $ticket))
+        ->get(route('badges.tickets.print', $ticket->encryptedDownloadKey()))
         ->assertForbidden();
 
     $this->actingAs(User::factory()->create(['role' => UserRole::Admin]))
-        ->get(route('badges.tickets.print', $ticket))
+        ->get(route('badges.tickets.print', $ticket->encryptedDownloadKey()))
         ->assertOk();
 });
 

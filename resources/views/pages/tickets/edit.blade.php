@@ -62,7 +62,7 @@
                     </label>
                     @if($ticket->buyer_photo_path)
                         <img
-                            src="{{ route('tickets.photo', $ticket) }}"
+                            src="{{ route('tickets.photo', $ticket->encryptedDownloadKey()) }}"
                             alt="Foto actual de {{ $ticket->buyer_name }}"
                             class="mb-3 h-32 w-32 rounded-xl border border-gray-200 object-cover dark:border-gray-800"
                         >
@@ -86,7 +86,7 @@
                     </label>
                     @if($ticket->payment_receipt_path)
                         <a
-                            href="{{ route('tickets.receipt', $ticket) }}"
+                            href="{{ route('tickets.receipt', $ticket->encryptedDownloadKey()) }}"
                             target="_blank"
                             rel="noopener"
                             class="mb-3 inline-flex text-sm text-brand-500 hover:underline"
