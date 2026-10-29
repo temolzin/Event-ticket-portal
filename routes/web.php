@@ -25,6 +25,7 @@ Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
     ->name('locale.switch');
 
 Route::middleware('guest')->group(function () {
+    Route::get('/signin', fn () => redirect()->route('login'))->name('signin');
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 });

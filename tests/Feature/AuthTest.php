@@ -52,6 +52,14 @@ it('redirects authenticated users away from the sign-in page', function () {
     $this->actingAs($user)->get('/login')->assertRedirect(route('dashboard'));
 });
 
+it('sends the old signin url to the login page', function () {
+    $this->get('/signin')
+        ->assertRedirect(route('login'));
+
+    actingRole(UserRole::Seller);
+    $this->get('/signin')->assertRedirect(route('dashboard'));
+});
+
 it('rejects invalid credentials', function () {
     $this->from(route('login'))
         ->post('/login', ['email' => 'nobody@eventportal.test', 'password' => 'wrong'])
