@@ -75,6 +75,7 @@ class StoreTicketRequest extends FormRequest
         $validator->after(function ($validator) {
             $cancelledClientExists = Ticket::query()
                 ->cancelled()
+                ->where('event_id', $this->integer('event_id'))
                 ->matchingCancelledClient(
                     (string) $this->input('buyer_name', ''),
                     (string) $this->input('buyer_email', '')
