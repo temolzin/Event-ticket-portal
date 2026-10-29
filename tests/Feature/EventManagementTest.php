@@ -2,6 +2,7 @@
 
 use App\Enums\UserRole;
 use App\Models\Event;
+use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -94,11 +95,18 @@ it('updates an event', function () {
         ->and($event->is_active)->toBeFalse();
 });
 
-it('locks the delete until the day after the event', function () {
-    $future = Event::factory()->create(['starts_at' => now()->addDays(5)]);
-    $today = Event::factory()->create(['starts_at' => now()->setTime(20, 0)]);
-    $yesterday = Event::factory()->create(['starts_at' => now()->subDay()]);
-    $past = Event::factory()->create(['starts_at' => now()->subDays(3)]);
+it('locks the delete of an event with sales until the day after the event', function () {
+    $make = function (string $startsAt): Event {
+        $event = Event::factory()->create(['starts_at' => $startsAt]);
+        Ticket::factory()->create(['event_id' => $event->id]);
+
+        return $event;
+    };
+
+    $future = $make(now()->addDays(5)->toDateTimeString());
+    $today = $make(now()->setTime(20, 0)->toDateTimeString());
+    $yesterday = $make(now()->subDay()->toDateTimeString());
+    $past = $make(now()->subDays(3)->toDateTimeString());
 
     expect($future->canBeDeleted())->toBeFalse()
         ->and($today->canBeDeleted())->toBeFalse()
@@ -106,8 +114,9 @@ it('locks the delete until the day after the event', function () {
         ->and($past->canBeDeleted())->toBeTrue();
 });
 
-it('blocks deleting an event that has not finished', function () {
+it('blocks deleting an event with sales that has not finished', function () {
     $event = Event::factory()->create(['starts_at' => now()->addDays(5)]);
+    Ticket::factory()->create(['event_id' => $event->id]);
 
     $this->actingAs(eventAdmin())
         ->delete("/events/{$event->id}")
