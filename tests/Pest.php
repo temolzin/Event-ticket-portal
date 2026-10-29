@@ -1,5 +1,8 @@
 <?php
 
+use App\Enums\UserRole;
+use App\Models\User;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -40,6 +43,15 @@ expect()->extend('toBeOne', function () {
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
+
+function actingRole(UserRole $role): User
+{
+    $user = User::factory()->create(['role' => $role]);
+
+    test()->actingAs($user);
+
+    return $user;
+}
 
 function something()
 {

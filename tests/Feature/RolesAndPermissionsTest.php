@@ -8,15 +8,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function actingRole(UserRole $role): User
-{
-    $user = User::factory()->create(['role' => $role]);
-
-    test()->actingAs($user);
-
-    return $user;
-}
-
 it('lets every role reach the dashboard', function (UserRole $role) {
     actingRole($role);
 

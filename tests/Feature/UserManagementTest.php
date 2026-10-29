@@ -10,11 +10,6 @@ use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
-function createUserManagementAdmin(): User
-{
-    return User::factory()->create(['role' => UserRole::Admin]);
-}
-
 function buildValidUserPayload(array $overrides = []): array
 {
     return array_merge([
@@ -38,21 +33,21 @@ it('lists users and filters by name, email, and role', function () {
         'role' => UserRole::Manager,
     ]);
 
-    $this->actingAs(createUserManagementAdmin())
-        ->get('/users?search=taylor&role=seller')
+    actingRole(UserRole::Admin);
+        $this->get('/users?search=taylor&role=seller')
         ->assertOk()
         ->assertSee('Taylor Seller')
         ->assertDontSee('Morgan Manager');
 
-    $this->actingAs(createUserManagementAdmin())
-        ->get('/users?search=example.test')
+    actingRole(UserRole::Admin);
+        $this->get('/users?search=example.test')
         ->assertOk()
         ->assertSee('Taylor Seller')
         ->assertSee('Morgan Manager');
 });
 
 it('shows the create and edit forms', function () {
-    $admin = createUserManagementAdmin();
+    $admin = User::factory()->create(['role' => UserRole::Admin]);
     $user = User::factory()->create(['name' => 'Jordan Seller']);
 
     $this->actingAs($admin)
@@ -69,8 +64,8 @@ it('shows the create and edit forms', function () {
 });
 
 it('creates a user with a hashed password and selected role', function () {
-    $this->actingAs(createUserManagementAdmin())
-        ->post('/users', buildValidUserPayload(['role' => UserRole::Manager->value]))
+    actingRole(UserRole::Admin);
+        $this->post('/users', buildValidUserPayload(['role' => UserRole::Manager->value]))
         ->assertRedirect(route('users.index'));
 
     $user = User::query()->where('email', 'taylor@example.test')->firstOrFail();
@@ -83,8 +78,8 @@ it('creates a user with a hashed password and selected role', function () {
 it('validates required fields, unique emails, roles, and password confirmation', function () {
     $existing = User::factory()->create(['email' => 'used@example.test']);
 
-    $this->actingAs(createUserManagementAdmin())
-        ->post('/users', [])
+    actingRole(UserRole::Admin);
+        $this->post('/users', [])
         ->assertSessionHasErrors(['name', 'email', 'role', 'password']);
 
     $this->post('/users', buildValidUserPayload([
@@ -106,8 +101,8 @@ it('updates user details and keeps the password when none is provided', function
     ]);
     $currentPassword = $user->password;
 
-    $this->actingAs(createUserManagementAdmin())
-        ->put(route('users.update', $user), [
+    actingRole(UserRole::Admin);
+        $this->put(route('users.update', $user), [
             'name' => 'After',
             'email' => $user->email,
             'role' => UserRole::Manager->value,
@@ -126,8 +121,8 @@ it('updates user details and keeps the password when none is provided', function
 it('updates the password when a confirmed replacement is provided', function () {
     $user = User::factory()->create();
 
-    $this->actingAs(createUserManagementAdmin())
-        ->put(route('users.update', $user), [
+    actingRole(UserRole::Admin);
+        $this->put(route('users.update', $user), [
             'name' => $user->name,
             'email' => $user->email,
             'role' => $user->role->value,
@@ -142,8 +137,8 @@ it('updates the password when a confirmed replacement is provided', function () 
 it('allows deleting a user without sales or check-in history', function () {
     $user = User::factory()->create();
 
-    $this->actingAs(createUserManagementAdmin())
-        ->delete(route('users.destroy', $user))
+    actingRole(UserRole::Admin);
+        $this->delete(route('users.destroy', $user))
         ->assertRedirect(route('users.index'));
 
     expect(User::query()->whereKey($user->id)->exists())->toBeFalse();
@@ -159,7 +154,7 @@ it('prevents deleting users with sales or check-in history', function () {
         'result' => ScanResult::NotFound,
     ]);
 
-    $admin = createUserManagementAdmin();
+    $admin = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->actingAs($admin)
         ->delete(route('users.destroy', $seller))
@@ -175,7 +170,7 @@ it('prevents deleting users with sales or check-in history', function () {
 });
 
 it('prevents deleting yourself or the last administrator', function () {
-    $admin = createUserManagementAdmin();
+    $admin = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->actingAs($admin)
         ->delete(route('users.destroy', $admin))
@@ -199,7 +194,7 @@ it('prevents deleting yourself or the last administrator', function () {
 });
 
 it('prevents demoting the last administrator or removing the current admin role', function () {
-    $admin = createUserManagementAdmin();
+    $admin = User::factory()->create(['role' => UserRole::Admin]);
     $staff = User::factory()->create(['role' => UserRole::Manager]);
 
     $this->actingAs($admin)
@@ -212,7 +207,7 @@ it('prevents demoting the last administrator or removing the current admin role'
         ])
         ->assertSessionHasErrors('role');
 
-    $otherAdmin = createUserManagementAdmin();
+    $otherAdmin = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->put(route('users.update', $otherAdmin), [
         'name' => $otherAdmin->name,

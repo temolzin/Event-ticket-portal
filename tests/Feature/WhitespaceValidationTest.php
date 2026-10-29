@@ -10,11 +10,6 @@ use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
-function whitespaceFormAdmin(): User
-{
-    return User::factory()->create(['role' => UserRole::Admin]);
-}
-
 it('rejects whitespace-only credentials at login', function () {
     $this->from('/signin')
         ->post('/login', [
@@ -28,8 +23,8 @@ it('rejects whitespace-only credentials at login', function () {
 });
 
 it('rejects whitespace-only user attributes', function () {
-    $this->actingAs(whitespaceFormAdmin())
-        ->from('/users/create')
+    actingRole(UserRole::Admin);
+        $this->from('/users/create')
         ->post('/users', [
             'name' => '   ',
             'email' => '  ',
@@ -43,7 +38,7 @@ it('rejects whitespace-only user attributes', function () {
 });
 
 it('rejects whitespace-only user email on update', function () {
-    $admin = whitespaceFormAdmin();
+    $admin = actingRole(UserRole::Admin);
     $user = User::factory()->create(['role' => UserRole::Seller]);
 
     $this->actingAs($admin)
@@ -59,8 +54,8 @@ it('rejects whitespace-only user email on update', function () {
 });
 
 it('rejects whitespace-only event attributes including nested ticket types', function () {
-    $this->actingAs(whitespaceFormAdmin())
-        ->from('/events/create')
+    actingRole(UserRole::Admin);
+        $this->from('/events/create')
         ->post('/events', [
             'name' => '  ',
             'venue' => '  ',
@@ -88,8 +83,8 @@ it('rejects whitespace-only event attributes including nested ticket types', fun
 it('rejects whitespace-only ticket type names with a localized message', function () {
     $event = Event::factory()->create();
 
-    $this->actingAs(whitespaceFormAdmin())
-        ->from('/events/'.$event->id)
+    actingRole(UserRole::Admin);
+        $this->from('/events/'.$event->id)
         ->post('/ticket-types', [
             'name' => '  ',
             'regular_price' => '  ',
