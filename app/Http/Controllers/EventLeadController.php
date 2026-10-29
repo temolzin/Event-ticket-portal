@@ -12,7 +12,7 @@ class EventLeadController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:100', "regex:/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s'\-]+$/u"],
             'company' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['required', 'regex:/^[0-9]{10}$/'],
