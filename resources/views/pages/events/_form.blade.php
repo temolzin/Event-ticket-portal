@@ -126,6 +126,7 @@
                             type="text"
                             :name="`ticket_types[${index}][name]`"
                             x-model="row.name"
+                            required
                             placeholder="Ej. Boleto individual"
                             class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
                         >
@@ -149,6 +150,7 @@
                             min="0"
                             :name="`ticket_types[${index}][regular_price]`"
                             x-model="row.regular_price"
+                            required
                             class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
                         >
                     </div>
