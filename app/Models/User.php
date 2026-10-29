@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\Permission;
 use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -68,6 +69,11 @@ class User extends Authenticatable
     public function isManager(): bool
     {
         return $this->role === UserRole::Manager;
+    }
+
+    public function hasPermission(Permission $permission): bool
+    {
+        return $this->role->hasPermission($permission);
     }
 
     public function tickets(): HasMany
