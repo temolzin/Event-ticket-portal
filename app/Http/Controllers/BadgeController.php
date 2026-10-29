@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\View\View;
 
 class BadgeController extends Controller
@@ -92,8 +94,23 @@ class BadgeController extends Controller
         return $this->renderBadges($event, $tickets);
     }
 
-    public function printTicket(Ticket $ticket): View
+    public function printTicket(string $ticket): View
     {
+        $encryptedKey = strtr($ticket, '-_', '+/');
+        $encryptedKey .= str_repeat('=', (4 - strlen($encryptedKey) % 4) % 4);
+
+        try {
+            $ticketId = Crypt::decryptString($encryptedKey);
+        } catch (DecryptException) {
+            abort(404);
+        }
+
+        if (! ctype_digit($ticketId)) {
+            abort(404);
+        }
+
+        $ticket = Ticket::query()->findOrFail((int) $ticketId);
+
         $this->authorize('view', $ticket);
         abort_if($ticket->isCancelled(), 404);
 

@@ -74,13 +74,13 @@
                         <p class="mb-2 text-xs uppercase text-gray-500 dark:text-gray-400">Foto del cliente</p>
                         @if($ticket->buyer_photo_path)
                             <img
-                                src="{{ route('tickets.photo', $ticket) }}"
+                                src="{{ route('tickets.photo', $ticket->encryptedDownloadKey()) }}"
                                 alt="Foto de {{ $ticket->buyer_name }}"
                                 class="h-40 w-full rounded-xl border border-gray-200 object-cover dark:border-gray-800"
                             >
                             <div class="mt-2 flex flex-wrap items-center gap-4">
                                 <a
-                                    href="{{ route('tickets.photo', $ticket) }}"
+                                    href="{{ route('tickets.photo', $ticket->encryptedDownloadKey()) }}"
                                     target="_blank"
                                     rel="noopener"
                                     class="text-xs text-brand-500 hover:underline"
@@ -88,7 +88,7 @@
                                     Ver en tamaño completo
                                 </a>
                                 <a
-                                    href="{{ route('tickets.photo-download', $ticket) }}"
+                                    href="{{ route('tickets.photo-download', $ticket->encryptedDownloadKey()) }}"
                                     class="text-xs text-brand-500 hover:underline"
                                 >
                                     Descargar foto
@@ -103,7 +103,7 @@
                         <p class="mb-2 text-xs uppercase text-gray-500 dark:text-gray-400">Comprobante de pago</p>
                         @if($ticket->payment_receipt_path)
                             <a
-                                href="{{ route('tickets.receipt', $ticket) }}"
+                                href="{{ route('tickets.receipt', $ticket->encryptedDownloadKey()) }}"
                                 target="_blank"
                                 rel="noopener"
                                 class="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-200 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
