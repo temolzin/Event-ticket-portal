@@ -11,12 +11,12 @@ use Illuminate\Support\Str;
 uses(RefreshDatabase::class);
 
 it('rejects whitespace-only credentials at login', function () {
-    $this->from('/signin')
+    $this->from('/login')
         ->post('/login', [
             'email' => '   ',
             'password' => '        ',
         ])
-        ->assertRedirect('/signin')
+        ->assertRedirect('/login')
         ->assertSessionHasErrors(['email', 'password']);
 
     $this->assertGuest();
@@ -24,7 +24,7 @@ it('rejects whitespace-only credentials at login', function () {
 
 it('rejects whitespace-only user attributes', function () {
     actingRole(UserRole::Admin);
-        $this->from('/users/create')
+    $this->from('/users/create')
         ->post('/users', [
             'name' => '   ',
             'email' => '  ',
@@ -55,7 +55,7 @@ it('rejects whitespace-only user email on update', function () {
 
 it('rejects whitespace-only event attributes including nested ticket types', function () {
     actingRole(UserRole::Admin);
-        $this->from('/events/create')
+    $this->from('/events/create')
         ->post('/events', [
             'name' => '  ',
             'venue' => '  ',
@@ -84,7 +84,7 @@ it('rejects whitespace-only ticket type names with a localized message', functio
     $event = Event::factory()->create();
 
     actingRole(UserRole::Admin);
-        $this->from('/events/'.$event->id)
+    $this->from('/events/'.$event->id)
         ->post('/ticket-types', [
             'name' => '  ',
             'regular_price' => '  ',

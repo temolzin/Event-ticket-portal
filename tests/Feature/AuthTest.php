@@ -29,15 +29,15 @@ it('welcomes guests on the public landing page', function () {
 });
 
 it('blocks guests from every protected page', function () {
-    $this->get('/dashboard')->assertRedirect(route('signin'));
-    $this->get('/events')->assertRedirect(route('signin'));
-    $this->get('/tickets')->assertRedirect(route('signin'));
-    $this->get('/check-in')->assertRedirect(route('signin'));
-    $this->get('/users')->assertRedirect(route('signin'));
+    $this->get('/dashboard')->assertRedirect(route('login'));
+    $this->get('/events')->assertRedirect(route('login'));
+    $this->get('/tickets')->assertRedirect(route('login'));
+    $this->get('/check-in')->assertRedirect(route('login'));
+    $this->get('/users')->assertRedirect(route('login'));
 });
 
 it('shows the sign-in page to guests', function () {
-    $this->get('/signin')
+    $this->get('/login')
         ->assertOk()
         ->assertSee('Portal de Eventos')
         ->assertSeeInOrder(['Portal de Eventos', 'Iniciar sesión'])
@@ -49,13 +49,21 @@ it('shows the sign-in page to guests', function () {
 it('redirects authenticated users away from the sign-in page', function () {
     $user = User::factory()->create();
 
-    $this->actingAs($user)->get('/signin')->assertRedirect(route('dashboard'));
+    $this->actingAs($user)->get('/login')->assertRedirect(route('dashboard'));
+});
+
+it('sends the old signin url to the login page', function () {
+    $this->get('/signin')
+        ->assertRedirect(route('login'));
+
+    actingRole(UserRole::Seller);
+    $this->get('/signin')->assertRedirect(route('dashboard'));
 });
 
 it('rejects invalid credentials', function () {
-    $this->from(route('signin'))
+    $this->from(route('login'))
         ->post('/login', ['email' => 'nobody@eventportal.test', 'password' => 'wrong'])
-        ->assertRedirect(route('signin'));
+        ->assertRedirect(route('login'));
 
     $this->assertGuest();
 });
@@ -70,7 +78,7 @@ it('authenticates with valid credentials and logs out', function () {
 
     $this->get('/')->assertOk();
 
-    $this->post('/logout')->assertRedirect(route('signin'));
+    $this->post('/logout')->assertRedirect(route('login'));
 
     $this->assertGuest();
 });
