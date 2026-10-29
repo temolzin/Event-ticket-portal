@@ -73,10 +73,27 @@ class CheckInController extends Controller
             ->groupBy('result')
             ->pluck('total', 'result');
 
+        $eventTotals = Scan::query()
+            ->leftJoin('tickets as scanned_tickets', 'scanned_tickets.id', '=', 'scans.ticket_id')
+            ->leftJoin('events as scanned_events', 'scanned_events.id', '=', 'scanned_tickets.event_id')
+            ->selectRaw("COALESCE(scanned_events.id, 0) as event_id, COALESCE(scanned_events.name, 'Evento desconocido') as event_name, scans.result, count(*) as total")
+            ->groupBy('scanned_events.id', 'scanned_events.name', 'scans.result')
+            ->get()
+            ->groupBy('event_id')
+            ->map(fn ($rows) => [
+                'name' => $rows->first()->event_name,
+                'total' => (int) $rows->sum('total'),
+                'allowed' => (int) $rows->where('result', ScanResult::Valid->value)->sum('total'),
+                'denied' => (int) $rows->where('result', '!=', ScanResult::Valid->value)->sum('total'),
+            ])
+            ->sortBy('name')
+            ->values();
+
         return view('pages.check-in.log', [
             'title' => 'Bitácora de escaneos',
             'scans' => $scans,
             'totals' => $totals,
+            'eventTotals' => $eventTotals,
             'results' => collect(ScanResult::cases())->mapWithKeys(
                 fn (ScanResult $result) => [$result->value => $result->describe()]
             ),

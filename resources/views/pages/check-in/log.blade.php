@@ -27,6 +27,36 @@
         </div>
     </div>
 
+    @if ($eventTotals->isNotEmpty())
+        <div class="mb-5 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+            <div class="border-b border-gray-100 px-5 py-3 dark:border-gray-800">
+                <h2 class="text-sm font-semibold text-gray-800 dark:text-white/90">Escaneos por evento</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[480px]">
+                    <thead class="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+                        <tr>
+                            <th class="px-5 py-3 text-start text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Evento</th>
+                            <th class="px-5 py-3 text-end text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Total</th>
+                            <th class="px-5 py-3 text-end text-xs font-medium uppercase text-success-700 dark:text-success-400">Permitidos</th>
+                            <th class="px-5 py-3 text-end text-xs font-medium uppercase text-error-700 dark:text-error-400">Denegados</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                        @foreach ($eventTotals as $eventTotal)
+                            <tr>
+                                <td class="px-5 py-3 text-sm font-medium text-gray-800 dark:text-white/90">{{ $eventTotal['name'] }}</td>
+                                <td class="px-5 py-3 text-end text-sm text-gray-500 dark:text-gray-400">{{ $eventTotal['total'] }}</td>
+                                <td class="px-5 py-3 text-end text-sm text-success-700 dark:text-success-400">{{ $eventTotal['allowed'] }}</td>
+                                <td class="px-5 py-3 text-end text-sm text-error-700 dark:text-error-400">{{ $eventTotal['denied'] }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
+
     <form method="GET" action="{{ route('check-in.log') }}" class="mb-5 flex flex-wrap items-end gap-3">
         <x-form.select
             name="result"
