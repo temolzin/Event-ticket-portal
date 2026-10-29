@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\UserRole;
+use App\Http\Controllers\TicketController;
 use App\Models\Event;
 use App\Models\Ticket;
 use App\Models\User;
@@ -137,10 +138,35 @@ it('lets only the admin see the cancelled tickets list', function () {
 });
 
 it('exposes ticket edit, update, and cancellation routes', function () {
-    $ticketRoutes = collect(app('router')->getRoutes())
-        ->map(fn ($route) => $route->uri())
-        ->filter(fn (string $uri) => str_starts_with($uri, 'tickets'));
+    $router = app('router');
 
-    expect($ticketRoutes->contains(fn (string $uri) => str_contains($uri, 'edit')))->toBeTrue()
-        ->and($ticketRoutes->contains(fn (string $uri) => str_contains($uri, '{ticket}')))->toBeTrue();
+    $edit = $router->getRoutes()->getByName('tickets.edit');
+    expect($edit)->not->toBeNull()
+        ->and($edit->uri())->toBe('tickets/{ticket}/edit')
+        ->and($edit->methods())->toContain('GET')
+        ->and($edit->getActionName())->toBe(TicketController::class.'@edit');
+
+    $update = $router->getRoutes()->getByName('tickets.update');
+    expect($update)->not->toBeNull()
+        ->and($update->uri())->toBe('tickets/{ticket}')
+        ->and($update->methods())->toBe(['PUT'])
+        ->and($update->getActionName())->toBe(TicketController::class.'@update');
+
+    $cancel = $router->getRoutes()->getByName('tickets.cancel');
+    expect($cancel)->not->toBeNull()
+        ->and($cancel->uri())->toBe('tickets/{ticket}/cancel')
+        ->and($cancel->methods())->toContain('POST')
+        ->and($cancel->getActionName())->toBe(TicketController::class.'@cancel');
+
+    $show = $router->getRoutes()->getByName('tickets.show');
+    expect($show)->not->toBeNull()
+        ->and($show->uri())->toBe('tickets/{ticket}')
+        ->and($show->methods())->toBe(['GET', 'HEAD'])
+        ->and($show->getActionName())->toBe(TicketController::class.'@show');
+
+    $routeRegistry = collect($router->getRoutes())
+        ->mapWithKeys(fn ($route) => [$route->getName() => $route]);
+    foreach (['tickets.edit', 'tickets.update', 'tickets.cancel'] as $name) {
+        expect($routeRegistry->has($name))->toBeTrue();
+    }
 });
