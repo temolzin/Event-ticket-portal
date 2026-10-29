@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Enums\UserRole;
+use App\Enums\Permission;
 use App\Models\Ticket;
 use App\Models\User;
 
@@ -10,22 +10,24 @@ class TicketPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->role === UserRole::Seller;
+        return $user->hasPermission(Permission::ViewTickets);
     }
 
     public function view(User $user, Ticket $ticket): bool
     {
-        return $user->isAdmin() || $user->id === $ticket->seller_id;
+        return $user->hasPermission(Permission::ViewTickets)
+            && ($user->isAdmin() || $user->id === $ticket->seller_id);
     }
 
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->role === UserRole::Seller;
+        return $user->hasPermission(Permission::CreateTicket);
     }
 
     public function update(User $user, Ticket $ticket): bool
     {
-        return ($user->isAdmin() || $user->id === $ticket->seller_id)
+        return $user->hasPermission(Permission::UpdateOwnTicket)
+            && ($user->isAdmin() || $user->id === $ticket->seller_id)
             && ! $ticket->isCancelled()
             && ! $ticket->wasUsed();
     }
@@ -37,28 +39,26 @@ class TicketPolicy
 
     public function send(User $user, Ticket $ticket): bool
     {
-        return ($user->isAdmin() || $user->id === $ticket->seller_id)
+        return $user->hasPermission(Permission::UpdateOwnTicket)
+            && ($user->isAdmin() || $user->id === $ticket->seller_id)
             && ! $ticket->isCancelled()
             && ! $ticket->wasUsed();
     }
 
     public function cancel(User $user, Ticket $ticket): bool
     {
-        return $user->isAdmin() && ! $ticket->isCancelled() && ! $ticket->wasUsed();
-    }
-
-    public function reactivate(User $user, Ticket $ticket): bool
-    {
-        return $user->isAdmin() && $ticket->isCancelled();
+        return $user->hasPermission(Permission::CancelTicket)
+            && ! $ticket->isCancelled()
+            && ! $ticket->wasUsed();
     }
 
     public function viewCancelled(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->hasPermission(Permission::ViewCancelledTickets);
     }
 
     public function checkIn(User $user): bool
     {
-        return $user->isAdmin() || $user->role === UserRole::Manager;
+        return $user->hasPermission(Permission::PerformCheckIn);
     }
 }

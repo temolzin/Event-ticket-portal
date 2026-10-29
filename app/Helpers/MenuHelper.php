@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Enums\Permission;
 use App\Enums\UserRole;
 
 class MenuHelper
@@ -13,38 +14,39 @@ class MenuHelper
                 'icon' => 'dashboard',
                 'name' => 'Dashboard',
                 'path' => '/dashboard',
+                'permission' => Permission::ViewDashboard,
             ],
             [
                 'icon' => 'calendar',
                 'name' => 'Events',
                 'path' => '/events',
-                'roles' => [UserRole::Admin],
+                'permission' => Permission::ManageEvents,
             ],
             [
                 'icon' => 'support-ticket',
                 'name' => 'Tickets',
                 'path' => '/tickets',
-                'roles' => [UserRole::Admin, UserRole::Seller],
+                'permission' => Permission::ViewTickets,
             ],
             [
                 'icon' => 'badge',
                 'name' => 'Badges',
                 'path' => '/badges',
-                'roles' => [UserRole::Admin, UserRole::Seller],
+                'permission' => Permission::ManageBadges,
             ],
             [
                 'icon' => 'check-in',
                 'name' => 'Check In',
                 'path' => '/check-in',
-                'roles' => [UserRole::Admin, UserRole::Manager],
+                'permission' => Permission::PerformCheckIn,
             ],
             [
                 'icon' => 'user-profile',
                 'name' => 'Users',
                 'path' => '/users',
-                'roles' => [UserRole::Admin],
+                'permission' => Permission::ManageUsers,
             ],
-        ], fn (array $item) => self::allowsRole($item['roles'] ?? null)));
+        ], fn (array $item) => self::allows($item['permission'] ?? null)));
     }
 
     public static function getOthersItems()
@@ -54,20 +56,24 @@ class MenuHelper
                 'icon' => 'scan-log',
                 'name' => 'Scan Log',
                 'path' => '/check-in/log',
-                'roles' => [UserRole::Admin, UserRole::Manager],
+                'permission' => Permission::ViewScanLog,
             ],
             [
                 'icon' => 'cancel-list',
                 'name' => 'Cancelled Tickets',
                 'path' => '/tickets-cancelled',
-                'roles' => [UserRole::Admin],
+                'permission' => Permission::ViewCancelledTickets,
             ],
-        ], fn (array $item) => self::allowsRole($item['roles'] ?? null)));
+        ], fn (array $item) => self::allows($item['permission'] ?? null)));
     }
 
-    public static function allowsRole(?array $roles): bool
+    public static function allows(?Permission $permission): bool
     {
-        return $roles === null || in_array(auth()->user()?->role, $roles, true);
+        if ($permission === null) {
+            return true;
+        }
+
+        return auth()->user()?->hasPermission($permission) ?? false;
     }
 
     public static function getMenuGroups()
