@@ -62,7 +62,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
-        Route::get('/users/permissions', [UserController::class, 'permissions'])->name('users.permissions');
+        Route::get('/users/permissions', [UserController::class, 'showPermissions'])->name('users.permissions');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
@@ -83,13 +83,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/tickets/cancelled-match', [TicketController::class, 'checkCancelledClient'])
             ->name('tickets.cancelled-match');
         Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
-        Route::get('/tickets/events/{event}/types', [TicketController::class, 'eventTypes'])->name('tickets.event-types');
+        Route::get('/tickets/events/{event}/types', [TicketController::class, 'listEventTypes'])->name('tickets.event-types');
         Route::get('/tickets/{ticket}/edit', [TicketController::class, 'edit'])->name('tickets.edit');
         Route::put('/tickets/{ticket}', [TicketController::class, 'update'])->name('tickets.update');
         Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
-        Route::get('/tickets/{ticket}/photo', [TicketController::class, 'buyerPhoto'])->name('tickets.photo');
-        Route::get('/tickets/{ticket}/photo/download', [TicketController::class, 'buyerPhotoDownload'])->name('tickets.photo-download');
-        Route::get('/tickets/{ticket}/receipt', [TicketController::class, 'paymentReceipt'])->name('tickets.receipt');
+        Route::get('/tickets/{ticket}/photo', [TicketController::class, 'showBuyerPhoto'])->name('tickets.photo');
+        Route::get('/tickets/{ticket}/photo/download', [TicketController::class, 'downloadBuyerPhoto'])->name('tickets.photo-download');
+        Route::get('/tickets/{ticket}/receipt', [TicketController::class, 'showPaymentReceipt'])->name('tickets.receipt');
         Route::post('/tickets/{ticket}/send', [TicketController::class, 'send'])->name('tickets.send');
         Route::get('/tickets/{ticket}/download', [TicketController::class, 'download'])->name('tickets.download');
         Route::post('/tickets/{ticket}/cancel', [TicketController::class, 'cancel'])
@@ -102,7 +102,7 @@ Route::middleware('auth')->group(function () {
             ->middleware('role:admin')
             ->name('tickets.destroy');
 
-        Route::get('/tickets-cancelled', [TicketController::class, 'cancelled'])
+        Route::get('/tickets-cancelled', [TicketController::class, 'listCancelled'])
             ->middleware('role:admin')
             ->name('tickets.cancelled');
     });
@@ -110,7 +110,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,manager')->group(function () {
         Route::get('/check-in', [CheckInController::class, 'create'])->name('check-in.scan');
         Route::post('/check-in', [CheckInController::class, 'store'])->name('check-in.store');
-        Route::get('/check-in/{scan}/result', [CheckInController::class, 'result'])->name('check-in.result');
+        Route::get('/check-in/{scan}/result', [CheckInController::class, 'showResult'])->name('check-in.result');
         Route::get('/check-in/log', [CheckInController::class, 'index'])->name('check-in.log');
     });
 });

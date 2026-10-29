@@ -104,7 +104,7 @@ class TicketController extends Controller
             ->with('status', 'Datos del cliente actualizados correctamente.');
     }
 
-    public function eventTypes(Event $event): JsonResponse
+    public function listEventTypes(Event $event): JsonResponse
     {
         $this->authorize('create', Ticket::class);
 
@@ -192,7 +192,7 @@ class TicketController extends Controller
         return view('pages.tickets.print', ['title' => 'Boleto', 'ticket' => $ticket]);
     }
 
-    public function buyerPhoto(string $ticket): BinaryFileResponse
+    public function showBuyerPhoto(string $ticket): BinaryFileResponse
     {
         $ticket = $this->resolveTicketFromEncryptedKey($ticket);
 
@@ -207,7 +207,7 @@ class TicketController extends Controller
         return $this->privateFileResponse($path, 'foto-'.$ticket->code.$this->resolveExtension($path));
     }
 
-    public function buyerPhotoDownload(string $ticket): BinaryFileResponse
+    public function downloadBuyerPhoto(string $ticket): BinaryFileResponse
     {
         $ticket = $this->resolveTicketFromEncryptedKey($ticket);
 
@@ -222,7 +222,7 @@ class TicketController extends Controller
         return $this->privateFileResponse($path, 'foto-'.$ticket->code.$this->resolveExtension($path), 'attachment');
     }
 
-    public function paymentReceipt(string $ticket): BinaryFileResponse
+    public function showPaymentReceipt(string $ticket): BinaryFileResponse
     {
         $ticket = $this->resolveTicketFromEncryptedKey($ticket);
 
@@ -280,7 +280,7 @@ class TicketController extends Controller
             ->with('status', 'Cliente reactivado correctamente.');
     }
 
-    public function cancelled(): View
+    public function listCancelled(): View
     {
         $this->authorize('viewCancelled', Ticket::class);
 
