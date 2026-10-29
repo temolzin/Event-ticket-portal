@@ -280,11 +280,6 @@ aside[id],
     color: var(--white);
 }
 
-.hero__lockup img,
-.footer__brand img {
-    filter: brightness(0) invert(1);
-}
-
 .hero {
     position: relative;
     overflow: hidden;

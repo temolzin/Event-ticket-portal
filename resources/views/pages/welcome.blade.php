@@ -19,7 +19,7 @@
         property="og:description"
         />
         <meta content="website" property="og:type" />
-        <link href={{ asset('images/brand/rootheim-logo-light.png') }} rel="icon" type="image/png" />
+        <link href={{ asset('images/brand/favicon.png') }} rel="icon" type="image/png" />
         <link href="https://fonts.googleapis.com" rel="preconnect" />
         <link crossorigin href="https://fonts.gstatic.com" rel="preconnect" />
         <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
@@ -163,9 +163,12 @@
                     <input
                         autocomplete="name"
                         id="name"
+                        maxlength="100"
                         name="name"
+                        pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]+"
                         placeholder="Nombre y apellido"
                         required
+                        title="Solo se permiten letras, espacios, apóstrofos y guiones"
                         type="text"
                     />
                     </div>
@@ -174,6 +177,7 @@
                     <label for="company">Empresa</label>
                     <input
                         autocomplete="organization"
+                        maxlength="100"
                         id="company"
                         name="company"
                         placeholder="Razón social o marca"
@@ -540,13 +544,23 @@
             const form = $('[data-form="registerForm"]');
             const status = $("#formStatus");
             const phoneInput = $("#phone");
+            const nameInput = $("#name");
 
             const onlyNumbers = (value) => value.replace(/[^0-9]/g, "").slice(0, 10);
+            const onlyLetters = (value) =>
+            value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s'\-]/g, "").slice(0, 100);
 
             if (phoneInput) {
                 phoneInput.setAttribute("maxlength", "10");
                 phoneInput.addEventListener("input", () => {
                     phoneInput.value = onlyNumbers(phoneInput.value);
+                });
+            }
+
+            if (nameInput) {
+                nameInput.setAttribute("maxlength", "100");
+                nameInput.addEventListener("input", () => {
+                    nameInput.value = onlyLetters(nameInput.value);
                 });
             }
 
