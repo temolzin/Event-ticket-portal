@@ -111,7 +111,8 @@ it('blocks deleting an event that has not finished', function () {
 
     $this->actingAs(eventAdmin())
         ->delete("/events/{$event->id}")
-        ->assertForbidden();
+        ->assertRedirect()
+        ->assertSessionHasErrors();
 
     expect(Event::query()->whereKey($event->id)->exists())->toBeTrue();
 });

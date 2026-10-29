@@ -86,7 +86,11 @@ class EventController extends Controller
 
     public function destroy(Event $event): RedirectResponse
     {
-        $this->authorize('delete', $event);
+        abort_unless(auth()->user()?->isAdmin(), 403);
+
+        if ($reason = $event->deleteBlockReason()) {
+            return back()->withErrors(['event' => $reason]);
+        }
 
         $event->delete();
 

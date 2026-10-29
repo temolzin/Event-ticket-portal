@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('content')
     <x-common.page-breadcrumb pageTitle="Detalle del evento" />
@@ -78,7 +78,7 @@
                     <button
                         type="submit"
                         @disabled(! $event->canBeDeleted())
-                        title="{{ $event->canBeDeleted() ? 'Eliminar evento' : 'Se desbloquea un día después del evento' }}"
+                        title="{{ $event->canBeDeleted() ? 'Eliminar evento' : $event->deleteBlockReason() }}"
                         class="inline-flex w-full items-center justify-center rounded-lg px-5 py-3 text-sm font-medium transition {{ $event->canBeDeleted() ? 'bg-error-50 text-error-500 hover:bg-error-100 dark:bg-error-500/15 dark:text-error-500' : 'cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-gray-600' }}"
                     >
                         Eliminar
