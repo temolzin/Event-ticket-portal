@@ -88,6 +88,19 @@ class Event extends Model
 
     public function canBeDeleted(): bool
     {
-        return $this->hasEnded();
+        if ($this->activeTickets()->exists()) {
+            return $this->hasEnded();
+        }
+
+        return true;
+    }
+
+    public function deleteBlockReason(): ?string
+    {
+        if ($this->activeTickets()->exists() && ! $this->hasEnded()) {
+            return 'No se puede eliminar el evento: tiene boletos vendidos y aún no ha finalizado.';
+        }
+
+        return null;
     }
 }
