@@ -47,6 +47,11 @@ class TicketPolicy
         return $user->isAdmin() && ! $ticket->isCancelled() && ! $ticket->wasUsed();
     }
 
+    public function reactivate(User $user, Ticket $ticket): bool
+    {
+        return $user->isAdmin() && $ticket->isCancelled();
+    }
+
     public function viewCancelled(User $user): bool
     {
         return $user->isAdmin();
