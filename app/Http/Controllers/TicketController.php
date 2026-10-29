@@ -129,16 +129,23 @@ class TicketController extends Controller
         $validated = $request->validate([
             'buyer_name' => ['nullable', 'string', 'max:255'],
             'buyer_email' => ['nullable', 'email', 'max:255'],
+            'event_id' => ['nullable', 'integer', 'exists:events,id'],
         ]);
         $name = $validated['buyer_name'] ?? '';
         $email = $validated['buyer_email'] ?? '';
+        $eventId = $validated['event_id'] ?? null;
+
+        $query = Ticket::query()
+            ->cancelled()
+            ->matchingCancelledClient($name, $email);
+
+        if ($eventId !== null) {
+            $query->where('event_id', $eventId);
+        }
 
         return response()->json([
             'exists' => ($name !== '' || $email !== '')
-                && Ticket::query()
-                    ->cancelled()
-                    ->matchingCancelledClient($name, $email)
-                    ->exists(),
+                && $query->exists(),
         ]);
     }
 

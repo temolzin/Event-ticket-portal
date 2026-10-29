@@ -239,6 +239,7 @@
                                 const params = new URLSearchParams({
                                     buyer_name: form.elements.buyer_name.value,
                                     buyer_email: form.elements.buyer_email.value,
+                                    event_id: form.elements.event_id.value,
                                 });
                                 const response = await fetch(`${this.cancelledMatchUrl}?${params}`, {
                                     headers: { Accept: 'application/json' },

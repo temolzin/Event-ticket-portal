@@ -342,6 +342,7 @@ it('requires confirmation before registering a customer from the cancelled list'
     $seller = saleSeller();
     Ticket::factory()->create([
         'status' => TicketStatus::Cancelled,
+        'event_id' => $event->id,
         'buyer_name' => 'Ana López',
         'buyer_email' => 'ana@ejemplo.com',
     ]);
