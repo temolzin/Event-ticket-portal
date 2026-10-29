@@ -7,7 +7,7 @@
             <div class="flex w-full flex-1 flex-col">
                 <div class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
                     <div>
-                        <a href="{{ route('signin') }}" class="mb-8 inline-flex items-center gap-3">
+                        <a href="{{ route('login') }}" class="mb-8 inline-flex items-center gap-3">
                             <span class="flex size-11 items-center justify-center rounded-xl bg-brand-500 shadow-theme-sm">
                                 <img src="/images/logo/logo-icon.svg" alt="" width="30" height="30" />
                             </span>
@@ -25,7 +25,7 @@
                             </p>
                         </div>
                         <div>
-                            <form method="POST" action="{{ route('login') }}">
+                            <form method="POST" action="{{ route('login.store') }}">
                                 @csrf
                                 <div class="space-y-5">
                                     <!-- Email -->
