@@ -95,6 +95,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/tickets/{ticket}/cancel', [TicketController::class, 'cancel'])
             ->middleware('role:admin')
             ->name('tickets.cancel');
+        Route::post('/tickets/{ticket}/reactivate', [TicketController::class, 'reactivate'])
+            ->middleware('role:admin')
+            ->name('tickets.reactivate');
         Route::delete('/tickets/{ticket}', [TicketController::class, 'destroy'])
             ->middleware('role:admin')
             ->name('tickets.destroy');

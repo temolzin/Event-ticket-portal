@@ -270,6 +270,16 @@ class TicketController extends Controller
         return $this->cancel($ticket);
     }
 
+    public function reactivate(Ticket $ticket): RedirectResponse
+    {
+        $this->authorize('reactivate', $ticket);
+
+        $ticket->update(['status' => TicketStatus::Generated]);
+
+        return to_route('tickets.cancelled')
+            ->with('status', 'Cliente reactivado correctamente.');
+    }
+
     public function cancelled(): View
     {
         $this->authorize('viewCancelled', Ticket::class);
