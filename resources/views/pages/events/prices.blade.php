@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
     <x-common.page-breadcrumb pageTitle="Precios del evento" />
@@ -9,7 +9,7 @@
         <div>
             <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">{{ $event->name }}</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ $event->starts_at->translatedFormat('d M Y, H:i') }} · {{ $event->venue }}
+                {{ $event->starts_at->translatedFormat('d M Y, H:i') }} Â· {{ $event->venue }}
             </p>
         </div>
         <a
@@ -42,7 +42,7 @@
                                         {{ $ticketType->name }}
                                     </td>
                                     <td class="px-3 py-4 text-end text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $ticketType->early_price ? '$' . number_format((float) $ticketType->early_price, 2) : '—' }}
+                                        {{ $ticketType->early_price ? '$' . number_format((float) $ticketType->early_price, 2) : 'â€”' }}
                                     </td>
                                     <td class="px-3 py-4 text-end text-sm text-gray-500 dark:text-gray-400">
                                         ${{ number_format((float) $ticketType->regular_price, 2) }}
@@ -74,7 +74,7 @@
                                                 method="POST"
                                                 action="{{ route('ticket-types.destroy', [$event, $ticketType]) }}"
                                                 x-data
-                                                @submit.prevent="confirmAction('¿Seguro que quieres eliminar este boleto?').then(confirmed => { if (confirmed) $el.submit(); })"
+                                                @submit.prevent="confirmAction('Â¿Seguro que quieres eliminar este boleto?').then(confirmed => { if (confirmed) $el.submit(); })"
                                             >
                                                 @csrf
                                                 @method('DELETE')
@@ -93,7 +93,7 @@
                             @empty
                                 <tr>
                                     <td colspan="6" class="px-3 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
-                                        Todavía no hay boletos registrados para este evento.
+                                        TodavÃ­a no hay boletos registrados para este evento.
                                     </td>
                                 </tr>
                             @endforelse
@@ -132,7 +132,7 @@
                         step="0.01"
                         min="0"
                         label="Precio de preventa"
-                        help="Déjalo vacío si el boleto siempre cuesta lo mismo."
+                        help="DÃ©jalo vacÃ­o si el boleto siempre cuesta lo mismo."
                     />
 
                     <x-form.input
@@ -143,20 +143,6 @@
                         label="Precio normal"
                         required
                     />
-
-                    <div class="flex items-center gap-2">
-                        <input
-                            id="is_active"
-                            type="checkbox"
-                            name="is_active"
-                            value="1"
-                            checked
-                            class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20 dark:border-gray-700"
-                        >
-                        <label for="is_active" class="text-sm text-gray-700 dark:text-gray-400">
-                            Disponible para venta
-                        </label>
-                    </div>
 
                     <button
                         type="submit"
