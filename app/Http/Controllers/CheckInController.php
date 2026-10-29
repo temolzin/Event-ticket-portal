@@ -36,7 +36,7 @@ class CheckInController extends Controller
         return to_route('check-in.result', $scan);
     }
 
-    public function result(Scan $scan): View
+    public function showResult(Scan $scan): View
     {
         $this->authorize('checkIn', Ticket::class);
 

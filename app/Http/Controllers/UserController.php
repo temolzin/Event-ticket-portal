@@ -50,7 +50,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function permissions(): View
+    public function showPermissions(): View
     {
         return view('pages.users.permissions', [
             'title' => __('Permissions by role'),
