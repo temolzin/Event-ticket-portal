@@ -39,12 +39,6 @@ export function calendarInit() {
       end: new Date(Date.now() + 259200000).toISOString().split("T")[0],
       extendedProps: { calendar: "Primary" },
     },
-    {
-      id: "4",
-      title: "Conferencia",
-      start: new Date(Date.now() + 345600000).toISOString().split("T")[0],
-      extendedProps: { calendar: "Warning" },
-    },
   ];
 
   // Calendar Modal Elements
