@@ -125,8 +125,8 @@ it('shows delete permissions for administrators in the permissions matrix', func
 
     expect($items['Eliminar usuarios sin ventas ni check-in']['admin'])->toBeTrue()
         ->and($items['Eliminar boletos y clientes con boleto asociado']['admin'])->toBeTrue()
-        ->and($items['Eliminar usuarios sin ventas ni check-in']['manager'])->toBeTrue()
-        ->and($items['Eliminar boletos y clientes con boleto asociado']['manager'])->toBeTrue();
+        ->and($items['Eliminar usuarios sin ventas ni check-in']['manager'])->toBeFalse()
+        ->and($items['Eliminar boletos y clientes con boleto asociado']['manager'])->toBeFalse();
 });
 
 it('lets the admin and the manager check in', function (UserRole $role) {
