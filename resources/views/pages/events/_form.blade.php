@@ -20,15 +20,25 @@
                 required
             />
 
-            <x-form.date-picker
-                name="starts_at"
-                label="Fecha y hora"
-                id="event-starts-at"
-                dateFormat="Y-m-d H:i"
-                :defaultDate="old('starts_at', $event?->starts_at?->format('Y-m-d H:i'))"
-                enableTime
-                required
-            />
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:col-span-2">
+                <x-form.date-picker
+                    name="starts_at_date"
+                    label="Fecha del evento"
+                    id="event-starts-at-date"
+                    dateFormat="Y-m-d"
+                    :defaultDate="old('starts_at', $event?->starts_at?->format('Y-m-d'))"
+                    required
+                />
+
+                <x-form.input
+                    name="starts_at_time"
+                    type="time"
+                    label="Hora del evento"
+                    :value="old('starts_at_time', $event?->starts_at?->format('H:i'))"
+                    required
+                />
+                <input type="hidden" name="starts_at" id="event-starts-at">
+            </div>
 
             <x-form.input
                 name="capacity"
@@ -210,3 +220,15 @@
         </button>
     </div>
 </div>
+
+<script>
+    document.querySelector('form[action="{{ route('events.store') }}"], form[action="{{ isset($event) ? route('events.update', $event) : route('events.store') }}"]')?.addEventListener('submit', () => {
+        const date = document.getElementById('event-starts-at-date')?.value;
+        const time = document.querySelector('[name="starts_at_time"]')?.value;
+        const startsAt = document.getElementById('event-starts-at');
+
+        if (startsAt) {
+            startsAt.value = date && time ? `${date} ${time}` : '';
+        }
+    });
+</script>

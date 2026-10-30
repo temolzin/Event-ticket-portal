@@ -19,11 +19,9 @@
                 static: true,
                 monthSelectorType: 'static',
                 dateFormat: '{{ $dateFormat }}',
-                enableTime: {{ $enableTime ? 'true' : 'false' }},
-                time_24hr: true,
                 defaultDate: {{ $defaultDate ? (is_array($defaultDate) ? json_encode($defaultDate) : "'" . $defaultDate . "'") : 'null' }},
                 onOpen: (selectedDates, dateStr, instance) => {
-                    if (!{{ $enableTime ? 'true' : 'false' }} || instance.calendarContainer.querySelector('[data-confirm-date]')) {
+                    if (instance.calendarContainer.querySelector('[data-confirm-date]')) {
                         return;
                     }
 
