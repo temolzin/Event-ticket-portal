@@ -10,6 +10,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+it('only exposes administrator and manager roles', function () {
+    expect(UserRole::cases())->toEqual([UserRole::Admin, UserRole::Manager]);
+});
+
 it('lets every role reach the dashboard', function (UserRole $role) {
     actingRole($role);
 
