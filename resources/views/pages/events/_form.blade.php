@@ -20,11 +20,13 @@
                 required
             />
 
-            <x-form.input
+            <x-form.date-picker
                 name="starts_at"
-                type="datetime-local"
                 label="Fecha y hora"
-                :value="$event?->starts_at?->format('Y-m-d\TH:i')"
+                id="event-starts-at"
+                dateFormat="Y-m-d H:i"
+                :defaultDate="old('starts_at', $event?->starts_at?->format('Y-m-d H:i'))"
+                enableTime
                 required
             />
 

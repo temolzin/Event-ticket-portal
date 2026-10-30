@@ -6,6 +6,8 @@
     'placeholder' => 'Select date',
     'name' => null,
     'dateFormat' => 'Y-m-d',
+    'enableTime' => false,
+    'confirmLabel' => 'Aceptar',
 ])
 
 <div x-data="{
@@ -17,7 +19,22 @@
                 static: true,
                 monthSelectorType: 'static',
                 dateFormat: '{{ $dateFormat }}',
+                enableTime: {{ $enableTime ? 'true' : 'false' }},
+                time_24hr: true,
                 defaultDate: {{ $defaultDate ? (is_array($defaultDate) ? json_encode($defaultDate) : "'" . $defaultDate . "'") : 'null' }},
+                onOpen: (selectedDates, dateStr, instance) => {
+                    if (!{{ $enableTime ? 'true' : 'false' }} || instance.calendarContainer.querySelector('[data-confirm-date]')) {
+                        return;
+                    }
+
+                    const confirmButton = document.createElement('button');
+                    confirmButton.type = 'button';
+                    confirmButton.dataset.confirmDate = 'true';
+                    confirmButton.textContent = @js($confirmLabel);
+                    confirmButton.className = 'mt-2 w-full rounded-lg bg-brand-500 px-3 py-2 text-sm font-medium text-white hover:bg-brand-600';
+                    confirmButton.addEventListener('click', () => instance.close());
+                    instance.calendarContainer.append(confirmButton);
+                },
                 onChange: (selectedDates, dateStr, instance) => {
                     this.$dispatch('date-change', {
                         selectedDates,
@@ -48,6 +65,7 @@
             id="{{ $id }}"
             name="{{ $name }}"
             placeholder="{{ $placeholder }}"
+            {{ $attributes }}
             class="h-11 w-full rounded-lg border appearance-none ltr:pl-4 ltr:pr-11 rtl:pr-4 rtl:pl-11 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800"
             autocomplete="off"
         />

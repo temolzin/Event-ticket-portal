@@ -8,6 +8,6 @@
     <form method="POST" action="{{ route('events.store') }}">
         @csrf
 
-        @include('pages.events._form', ['submitLabel' => 'Aceptar'])
+        @include('pages.events._form', ['submitLabel' => 'Guardar evento'])
     </form>
 @endsection
