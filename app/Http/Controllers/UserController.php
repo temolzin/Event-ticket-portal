@@ -94,6 +94,8 @@ class UserController extends Controller
 
     public function destroy(Request $request, User $user): RedirectResponse
     {
+        $this->authorize('delete', $user);
+
         $error = match (true) {
             $request->user()->is($user) => __('You cannot delete your own account.'),
             $user->isAdmin() && User::query()->where('role', UserRole::Admin)->count() === 1 => __('The last administrator cannot be deleted.'),

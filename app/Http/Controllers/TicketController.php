@@ -267,7 +267,12 @@ class TicketController extends Controller
 
     public function destroy(Ticket $ticket): RedirectResponse
     {
-        return $this->cancel($ticket);
+        $this->authorize('delete', $ticket);
+
+        $ticket->update(['status' => TicketStatus::Cancelled]);
+
+        return to_route('tickets.cancelled')
+            ->with('status', 'Cliente cancelado correctamente.');
     }
 
     public function reactivate(Ticket $ticket): RedirectResponse

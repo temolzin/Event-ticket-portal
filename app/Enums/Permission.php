@@ -13,6 +13,8 @@ enum Permission: string
     case CancelTicket = 'cancel_ticket';
     case ViewCancelledTickets = 'view_cancelled_tickets';
     case ManageUsers = 'manage_users';
+    case DeleteUsers = 'delete_users';
+    case DeleteTickets = 'delete_tickets';
     case ManageBadges = 'manage_badges';
     case PerformCheckIn = 'perform_check_in';
     case ViewScanLog = 'view_scan_log';

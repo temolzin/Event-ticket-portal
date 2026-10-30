@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\UserRole;
+use App\Helpers\PermissionMatrix;
 use App\Http\Controllers\TicketController;
 use App\Models\Event;
 use App\Models\Ticket;
@@ -9,13 +10,17 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+it('only exposes administrator and manager roles', function () {
+    expect(UserRole::cases())->toEqual([UserRole::Admin, UserRole::Manager]);
+});
+
 it('lets every role reach the dashboard', function (UserRole $role) {
     actingRole($role);
 
     $this->get('/')->assertOk();
 })->with([
     'admin' => UserRole::Admin,
-    'seller' => UserRole::Seller,
+    'seller' => UserRole::Admin,
     'manager' => UserRole::Manager,
 ]);
 
@@ -28,7 +33,7 @@ it('lets only the admin manage events', function () {
     $this->get("/events/{$event->id}")->assertOk();
     $this->get("/events/{$event->id}/edit")->assertOk();
 
-    actingRole(UserRole::Seller);
+    actingRole(UserRole::Manager);
     $this->get('/events')->assertForbidden();
     $this->get('/events/create')->assertForbidden();
 
@@ -43,8 +48,10 @@ it('lets only the admin manage users', function () {
     $this->get('/users/create')->assertOk();
     $user = User::factory()->create();
     $this->get("/users/{$user->id}/edit")->assertOk();
+    $deletableUser = User::factory()->create();
+    $this->delete("/users/{$deletableUser->id}")->assertRedirect(route('users.index'));
 
-    actingRole(UserRole::Seller);
+    actingRole(UserRole::Manager);
     $this->get('/users')->assertForbidden();
     $this->get('/users/create')->assertForbidden();
     $this->get("/users/{$user->id}/edit")->assertForbidden();
@@ -59,34 +66,6 @@ it('lets only the admin manage users', function () {
     $this->post('/users', [])->assertForbidden();
     $this->put("/users/{$user->id}", [])->assertForbidden();
     $this->delete("/users/{$user->id}")->assertForbidden();
-});
-
-it('lets the admin and the seller manage tickets', function (UserRole $role) {
-    $user = actingRole($role);
-    $ticket = Ticket::factory()->create(['seller_id' => $user->id]);
-
-    $this->get('/tickets')->assertOk();
-    $this->get('/tickets/create')->assertOk();
-    $this->get("/tickets/{$ticket->id}")->assertOk();
-    $this->get("/tickets/{$ticket->id}/edit")->assertOk();
-    $this->get(route('tickets.download', ['ticket' => $ticket->encryptedDownloadKey()]))->assertOk();
-    $this->post("/tickets/{$ticket->id}/send")->assertRedirect(route('tickets.show', $ticket));
-})->with([
-    'admin' => UserRole::Admin,
-    'seller' => UserRole::Seller,
-]);
-
-it('blocks the manager from every ticket page', function () {
-    $ticket = Ticket::factory()->create();
-
-    actingRole(UserRole::Manager);
-
-    $this->get('/tickets')->assertForbidden();
-    $this->get('/tickets/create')->assertForbidden();
-    $this->get("/tickets/{$ticket->id}")->assertForbidden();
-    $this->get("/tickets/{$ticket->id}/edit")->assertForbidden();
-    $this->post("/tickets/{$ticket->id}/send")->assertForbidden();
-    $this->get(route('tickets.download', ['ticket' => $ticket->encryptedDownloadKey()]))->assertForbidden();
 });
 
 it('lets only the admin cancel a ticket', function () {
@@ -97,12 +76,33 @@ it('lets only the admin cancel a ticket', function () {
 
     $other = Ticket::factory()->create();
 
-    actingRole(UserRole::Seller);
+    actingRole(UserRole::Manager);
     $this->post("/tickets/{$other->id}/cancel")->assertForbidden();
     $this->delete("/tickets/{$other->id}")->assertForbidden();
 
     actingRole(UserRole::Manager);
     $this->post("/tickets/{$other->id}/cancel")->assertForbidden();
+});
+
+it('lets the admin delete a ticket only when its user and client are associated', function () {
+    $ticket = Ticket::factory()->create();
+
+    actingRole(UserRole::Admin);
+    $this->delete(route('tickets.destroy', $ticket))
+        ->assertRedirect(route('tickets.cancelled'));
+
+    expect($ticket->fresh()->isCancelled())->toBeTrue();
+});
+
+it('shows delete permissions for administrators in the permissions matrix', function () {
+    $items = collect(PermissionMatrix::groups())
+        ->flatMap(fn (array $group) => $group['items'])
+        ->keyBy('label');
+
+    expect($items['Eliminar usuarios sin ventas ni check-in']['admin'])->toBeTrue()
+        ->and($items['Eliminar boletos y clientes con boleto asociado']['admin'])->toBeTrue()
+        ->and($items['Eliminar usuarios sin ventas ni check-in']['manager'])->toBeFalse()
+        ->and($items['Eliminar boletos y clientes con boleto asociado']['manager'])->toBeFalse();
 });
 
 it('lets the admin and the manager check in', function (UserRole $role) {
@@ -118,19 +118,11 @@ it('lets the admin and the manager check in', function (UserRole $role) {
     'manager' => UserRole::Manager,
 ]);
 
-it('blocks the seller from the check-in pages', function () {
-    actingRole(UserRole::Seller);
-
-    $this->get('/check-in')->assertForbidden();
-    $this->get('/check-in/log')->assertForbidden();
-    $this->post('/check-in')->assertForbidden();
-});
-
 it('lets only the admin see the cancelled tickets list', function () {
     actingRole(UserRole::Admin);
     $this->get('/tickets-cancelled')->assertOk();
 
-    actingRole(UserRole::Seller);
+    actingRole(UserRole::Manager);
     $this->get('/tickets-cancelled')->assertForbidden();
 
     actingRole(UserRole::Manager);

@@ -113,32 +113,6 @@ it('links the dashboard menu and sidebar logo to the dashboard route', function 
         ->assertSee('Nexus Tech 2027');
 });
 
-it('shows a seller their own sales alongside global event capacity', function () {
-    $seller = createDashboardUser(UserRole::Seller);
-    $event = createDashboardEvent(['capacity' => 20]);
-    Ticket::factory()->create([
-        'event_id' => $event->id,
-        'seller_id' => $seller->id,
-        'status' => TicketStatus::Sent,
-        'sent_at' => now(),
-    ]);
-    Ticket::factory()->create([
-        'event_id' => $event->id,
-        'status' => TicketStatus::Sent,
-        'sent_at' => now(),
-    ]);
-
-    $this->actingAs($seller)
-        ->get(route('dashboard'))
-        ->assertOk()
-        ->assertSee('Tus boletos vendidos')
-        ->assertSee('2 / 20')
-        ->assertSee('data-event-metric="your-sales" data-value="1"', false)
-        ->assertSee('data-event-metric="tickets-sent" data-value="1"', false)
-        ->assertSee('Registrar una venta')
-        ->assertSee('Ventas recientes');
-});
-
 it('limits manager dashboard check-in activity to their own scans', function () {
     $manager = createDashboardUser(UserRole::Manager);
     $otherManager = createDashboardUser(UserRole::Manager);

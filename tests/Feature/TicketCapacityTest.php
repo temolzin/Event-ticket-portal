@@ -124,49 +124,6 @@ it('never reports a negative number of available seats', function () {
     expect($event->countAvailableSeats())->toBe(0);
 });
 
-it('lists the cancelled tickets with the buyer and the seller who sold them', function () {
-    $event = createEventWithCapacity(100);
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
-
-    Ticket::factory()->create([
-        'event_id' => $event->id,
-        'seller_id' => $seller->id,
-        'buyer_name' => 'Ana López',
-        'buyer_email' => 'ana@example.test',
-        'status' => TicketStatus::Cancelled,
-    ]);
-
-    Ticket::factory()->create([
-        'event_id' => $event->id,
-        'seller_id' => $seller->id,
-        'buyer_name' => 'Luis Pérez',
-        'status' => TicketStatus::Generated,
-    ]);
-
-    $cancelled = $event->cancelledTickets()->with('seller')->get();
-
-    expect($cancelled)->toHaveCount(1)
-        ->and($cancelled->first()->buyer_name)->toBe('Ana López')
-        ->and($cancelled->first()->buyer_email)->toBe('ana@example.test')
-        ->and($cancelled->first()->seller->id)->toBe($seller->id)
-        ->and($cancelled->first()->isCancelled())->toBeTrue()
-        ->and($event->activeTickets)->toHaveCount(1);
-});
-
-it('scopes tickets by status and seller', function () {
-    $event = createEventWithCapacity(100);
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
-    $otherSeller = User::factory()->create(['role' => UserRole::Seller]);
-
-    Ticket::factory()->count(2)->create(['event_id' => $event->id, 'seller_id' => $seller->id]);
-    Ticket::factory()->create(['event_id' => $event->id, 'seller_id' => $seller->id, 'status' => TicketStatus::Cancelled]);
-    Ticket::factory()->create(['event_id' => $event->id, 'seller_id' => $otherSeller->id]);
-
-    expect(Ticket::query()->active()->count())->toBe(3)
-        ->and(Ticket::query()->cancelled()->count())->toBe(1)
-        ->and(Ticket::query()->soldBy($seller->id)->count())->toBe(3);
-});
-
 it('marks a ticket as used when it was checked in', function () {
     $ticket = Ticket::factory()->create(['status' => TicketStatus::Used, 'checked_in_at' => now()]);
     $pending = Ticket::factory()->create();

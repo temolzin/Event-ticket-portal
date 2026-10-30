@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Ticket;
 use App\Models\User;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\View\View;
 
 class BadgeController extends Controller
@@ -20,19 +20,9 @@ class BadgeController extends Controller
 
         $viewer = $request->user();
         $events = Event::query()
-            ->whereHas('tickets', fn (Builder $ticketQuery) => $ticketQuery
-                ->active()
-                ->when(
-                    $viewer->isSeller(),
-                    fn (Builder $sellerQuery) => $sellerQuery->soldBy($viewer->id)
-                ))
+            ->whereHas('tickets', fn (Builder $ticketQuery) => $ticketQuery->active())
             ->withCount([
-                'tickets as badge_tickets_count' => fn (Builder $ticketQuery) => $ticketQuery
-                    ->active()
-                    ->when(
-                        $viewer->isSeller(),
-                        fn (Builder $sellerQuery) => $sellerQuery->soldBy($viewer->id)
-                    ),
+                'tickets as badge_tickets_count' => fn (Builder $ticketQuery) => $ticketQuery->active(),
             ])
             ->orderByDesc('starts_at')
             ->get();
@@ -124,11 +114,7 @@ class BadgeController extends Controller
     {
         return Ticket::query()
             ->where('event_id', $event->id)
-            ->active()
-            ->when(
-                $viewer->isSeller(),
-                fn (Builder $ticketQuery) => $ticketQuery->soldBy($viewer->id)
-            );
+            ->active();
     }
 
     private function renderBadges(Event $event, Collection $tickets): View

@@ -28,7 +28,7 @@ it('rejects whitespace-only user attributes', function () {
         ->post('/users', [
             'name' => '   ',
             'email' => '  ',
-            'role' => UserRole::Seller->value,
+            'role' => UserRole::Admin->value,
             'password' => '        ',
             'password_confirmation' => '        ',
         ])
@@ -39,14 +39,14 @@ it('rejects whitespace-only user attributes', function () {
 
 it('rejects whitespace-only user email on update', function () {
     $admin = actingRole(UserRole::Admin);
-    $user = User::factory()->create(['role' => UserRole::Seller]);
+    $user = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->actingAs($admin)
         ->from("/users/{$user->id}/edit")
         ->put("/users/{$user->id}", [
             'name' => 'Valid Name',
             'email' => '   ',
-            'role' => UserRole::Seller->value,
+            'role' => UserRole::Admin->value,
         ])
         ->assertSessionHasErrors('email');
 
@@ -97,7 +97,7 @@ it('rejects whitespace-only ticket type names with a localized message', functio
 });
 
 it('rejects whitespace-only buyer attributes at ticket sale', function () {
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
+    $seller = User::factory()->create(['role' => UserRole::Admin]);
     $event = Event::factory()->create();
     $ticketType = TicketType::factory()->create(['event_id' => $event->id]);
 

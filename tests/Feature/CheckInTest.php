@@ -39,12 +39,6 @@ it('lets the admin open the scanner', function () {
         ->assertOk();
 });
 
-it('hides the scanner from the seller', function () {
-    $this->actingAs(User::factory()->create(['role' => UserRole::Seller]))
-        ->get('/check-in')
-        ->assertForbidden();
-});
-
 it('allows the access and marks the ticket as used', function () {
     $manager = checkInManager();
     $ticket = checkInTicket();
@@ -260,10 +254,4 @@ it('filters the log by result', function () {
         ->assertSeeInOrder(['value="not_found"', 'selected'], false)
         ->assertSee('OTRO-CODIGO')
         ->assertDontSee($ticket->code);
-});
-
-it('hides the log from the seller', function () {
-    $this->actingAs(User::factory()->create(['role' => UserRole::Seller]))
-        ->get('/check-in/log')
-        ->assertForbidden();
 });

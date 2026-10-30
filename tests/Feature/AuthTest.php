@@ -12,11 +12,6 @@ function adminUser(): User
     return User::factory()->create(['role' => UserRole::Admin]);
 }
 
-function sellerUser(): User
-{
-    return User::factory()->create(['role' => UserRole::Seller]);
-}
-
 function managerUser(): User
 {
     return User::factory()->create(['role' => UserRole::Manager]);
@@ -56,7 +51,7 @@ it('sends the old signin url to the login page', function () {
     $this->get('/signin')
         ->assertRedirect(route('login'));
 
-    actingRole(UserRole::Seller);
+    actingRole(UserRole::Admin);
     $this->get('/signin')->assertRedirect(route('dashboard'));
 });
 
@@ -86,8 +81,8 @@ it('authenticates with valid credentials and logs out', function () {
 it('applies the role middleware to block unauthorized roles', function () {
     Route::middleware(['auth', 'role:admin'])->get('/__role-check', fn () => 'allowed');
 
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
-    $this->actingAs($seller)->get('/__role-check')->assertForbidden();
+    $manager = User::factory()->create(['role' => UserRole::Manager]);
+    $this->actingAs($manager)->get('/__role-check')->assertForbidden();
 
     $manager = User::factory()->create(['role' => UserRole::Manager]);
     $this->actingAs($manager)->get('/__role-check')->assertForbidden();

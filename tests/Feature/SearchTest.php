@@ -13,7 +13,7 @@ it('searches events, clients, and users for administrators', function () {
     $seller = User::factory()->create([
         'name' => 'Morgan Seller',
         'email' => 'morgan@example.test',
-        'role' => UserRole::Seller,
+        'role' => UserRole::Admin,
     ]);
     $event = Event::factory()->create([
         'name' => 'Summer Conference',
@@ -43,27 +43,6 @@ it('searches events, clients, and users for administrators', function () {
         ->assertOk()
         ->assertSee('Morgan Seller')
         ->assertSee(route('users.edit', $seller));
-});
-
-it('limits seller search results to their own tickets', function () {
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
-    $otherSeller = User::factory()->create(['role' => UserRole::Seller]);
-    $ownTicket = Ticket::factory()->create([
-        'seller_id' => $seller->id,
-        'buyer_name' => 'Shared Search Name',
-    ]);
-    Ticket::factory()->create([
-        'seller_id' => $otherSeller->id,
-        'buyer_name' => 'Shared Search Name',
-    ]);
-
-    $this->actingAs($seller)
-        ->get(route('search', ['q' => 'Shared Search Name']))
-        ->assertOk()
-        ->assertSee(route('tickets.show', $ownTicket))
-        ->assertDontSee('events.show')
-        ->assertDontSee('users.edit')
-        ->assertSee('Shared Search Name');
 });
 
 it('validates search query length and shows the empty search prompt', function () {

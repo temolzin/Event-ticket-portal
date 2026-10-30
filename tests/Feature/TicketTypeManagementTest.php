@@ -4,7 +4,6 @@ use App\Enums\UserRole;
 use App\Models\Event;
 use App\Models\Ticket;
 use App\Models\TicketType;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -20,7 +19,7 @@ it('lists the prices of the event', function () {
     ]);
 
     actingRole(UserRole::Admin);
-        $this->get("/events/{$event->id}/prices")
+    $this->get("/events/{$event->id}/prices")
         ->assertOk()
         ->assertSee('Boleto individual')
         ->assertSee('990.00')
@@ -31,14 +30,14 @@ it('adds a ticket type from the prices screen', function () {
     $event = Event::factory()->create();
 
     actingRole(UserRole::Admin);
-        $this->post('/ticket-types', [
-            'event_id' => $event->id,
-            'name' => 'Boleto dupla',
-            'seats_per_ticket' => 2,
-            'early_price' => 990,
-            'regular_price' => 1500,
-            'is_active' => '1',
-        ])
+    $this->post('/ticket-types', [
+        'event_id' => $event->id,
+        'name' => 'Boleto dupla',
+        'seats_per_ticket' => 2,
+        'early_price' => 990,
+        'regular_price' => 1500,
+        'is_active' => '1',
+    ])
         ->assertRedirect(route('events.prices', $event));
 
     $type = TicketType::query()->where('event_id', $event->id)->firstOrFail();
@@ -55,12 +54,12 @@ it('accepts a ticket type without an early price', function () {
     $event = Event::factory()->create();
 
     actingRole(UserRole::Admin);
-        $this->post('/ticket-types', [
-            'event_id' => $event->id,
-            'name' => 'Boleto estudiante',
-            'early_price' => '',
-            'regular_price' => 700,
-        ])
+    $this->post('/ticket-types', [
+        'event_id' => $event->id,
+        'name' => 'Boleto estudiante',
+        'early_price' => '',
+        'regular_price' => 700,
+    ])
         ->assertRedirect(route('events.prices', $event));
 
     $type = TicketType::query()->where('event_id', $event->id)->firstOrFail();
@@ -73,11 +72,11 @@ it('rejects a ticket type without a name or a regular price', function () {
     $event = Event::factory()->create();
 
     actingRole(UserRole::Admin);
-        $this->post('/ticket-types', [
-            'event_id' => $event->id,
-            'name' => '',
-            'regular_price' => '',
-        ])
+    $this->post('/ticket-types', [
+        'event_id' => $event->id,
+        'name' => '',
+        'regular_price' => '',
+    ])
         ->assertSessionHasErrors(['name', 'regular_price']);
 });
 
@@ -90,11 +89,11 @@ it('rejects a repeated ticket type name on the same event', function () {
     ]);
 
     actingRole(UserRole::Admin);
-        $this->post('/ticket-types', [
-            'event_id' => $event->id,
-            'name' => 'Boleto individual',
-            'regular_price' => 1500,
-        ])
+    $this->post('/ticket-types', [
+        'event_id' => $event->id,
+        'name' => 'Boleto individual',
+        'regular_price' => 1500,
+    ])
         ->assertSessionHasErrors('key');
 });
 
@@ -103,13 +102,13 @@ it('toggles a ticket type on and off', function () {
     $type = TicketType::factory()->create(['event_id' => $event->id, 'is_active' => true]);
 
     actingRole(UserRole::Admin);
-        $this->patch("/events/{$event->id}/prices/{$type->id}")
+    $this->patch("/events/{$event->id}/prices/{$type->id}")
         ->assertRedirect(route('events.prices', $event));
 
     expect($type->fresh()->is_active)->toBeFalse();
 
     actingRole(UserRole::Admin);
-        $this->patch("/events/{$event->id}/prices/{$type->id}")
+    $this->patch("/events/{$event->id}/prices/{$type->id}")
         ->assertRedirect(route('events.prices', $event));
 
     expect($type->fresh()->is_active)->toBeTrue();
@@ -120,7 +119,7 @@ it('deletes a ticket type that has no sales', function () {
     $type = TicketType::factory()->create(['event_id' => $event->id]);
 
     actingRole(UserRole::Admin);
-        $this->delete("/events/{$event->id}/prices/{$type->id}")
+    $this->delete("/events/{$event->id}/prices/{$type->id}")
         ->assertRedirect(route('events.prices', $event));
 
     expect(TicketType::query()->whereKey($type->id)->exists())->toBeFalse();
@@ -135,7 +134,7 @@ it('blocks deleting a ticket type that already has sales', function () {
     ]);
 
     actingRole(UserRole::Admin);
-        $this->delete("/events/{$event->id}/prices/{$type->id}")
+    $this->delete("/events/{$event->id}/prices/{$type->id}")
         ->assertForbidden();
 
     expect(TicketType::query()->whereKey($type->id)->exists())->toBeTrue();
@@ -143,18 +142,18 @@ it('blocks deleting a ticket type that already has sales', function () {
 
 it('creates an event together with its ticket prices', function () {
     actingRole(UserRole::Admin);
-        $this->post('/events', [
-            'name' => 'Evento con boletos',
-            'venue' => 'Auditorio',
-            'starts_at' => now()->addMonth()->format('Y-m-d\TH:i'),
-            'capacity' => 100,
-            'early_quantity' => 30,
-            'is_active' => '1',
-            'ticket_types' => [
-                ['name' => 'Boleto individual', 'early_price' => 990, 'regular_price' => 1500],
-                ['name' => 'Boleto dupla', 'seats_per_ticket' => 2, 'early_price' => 1800, 'regular_price' => 2600],
-            ],
-        ])
+    $this->post('/events', [
+        'name' => 'Evento con boletos',
+        'venue' => 'Auditorio',
+        'starts_at' => now()->addMonth()->format('Y-m-d\TH:i'),
+        'capacity' => 100,
+        'early_quantity' => 30,
+        'is_active' => '1',
+        'ticket_types' => [
+            ['name' => 'Boleto individual', 'early_price' => 990, 'regular_price' => 1500],
+            ['name' => 'Boleto dupla', 'seats_per_ticket' => 2, 'early_price' => 1800, 'regular_price' => 2600],
+        ],
+    ])
         ->assertRedirect(route('events.index'));
 
     $event = Event::query()->where('name', 'Evento con boletos')->firstOrFail();
@@ -174,40 +173,21 @@ it('adds ticket prices when updating an event', function () {
     ]);
 
     actingRole(UserRole::Admin);
-        $this->put("/events/{$event->id}", [
-            'name' => $event->name,
-            'venue' => $event->venue,
-            'starts_at' => $event->starts_at->format('Y-m-d\TH:i'),
-            'capacity' => $event->capacity,
-            'early_quantity' => $event->early_quantity,
-            'is_active' => '1',
-            'ticket_types' => [
-                ['name' => 'Boleto individual', 'regular_price' => 1500],
-                ['name' => 'Boleto estudiante', 'regular_price' => 700],
-            ],
-        ])
+    $this->put("/events/{$event->id}", [
+        'name' => $event->name,
+        'venue' => $event->venue,
+        'starts_at' => $event->starts_at->format('Y-m-d\TH:i'),
+        'capacity' => $event->capacity,
+        'early_quantity' => $event->early_quantity,
+        'is_active' => '1',
+        'ticket_types' => [
+            ['name' => 'Boleto individual', 'regular_price' => 1500],
+            ['name' => 'Boleto estudiante', 'regular_price' => 700],
+        ],
+    ])
         ->assertRedirect(route('events.show', $event));
 
     expect($event->fresh()->ticketTypes)->toHaveCount(2)
         ->and($event->fresh()->ticketTypes->pluck('name')->all())
         ->toContain('Boleto individual', 'Boleto estudiante');
 });
-
-it('hides the prices screen from the seller and the manager', function (UserRole $role) {
-    $event = Event::factory()->create();
-
-    $this->actingAs(User::factory()->create(['role' => $role]))
-        ->get("/events/{$event->id}/prices")
-        ->assertForbidden();
-
-    $this->actingAs(User::factory()->create(['role' => $role]))
-        ->post('/ticket-types', [
-            'event_id' => $event->id,
-            'name' => 'Boleto individual',
-            'regular_price' => 1500,
-        ])
-        ->assertForbidden();
-})->with([
-    'seller' => UserRole::Seller,
-    'manager' => UserRole::Manager,
-]);

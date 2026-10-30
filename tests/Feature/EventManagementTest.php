@@ -3,7 +3,6 @@
 use App\Enums\UserRole;
 use App\Models\Event;
 use App\Models\Ticket;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -25,7 +24,7 @@ it('lists the events for the admin', function () {
     $event = Event::factory()->create(['name' => 'Evento Listado']);
 
     actingRole(UserRole::Admin);
-        $this->get('/events')
+    $this->get('/events')
         ->assertOk()
         ->assertSee('Evento Listado');
 });
@@ -34,7 +33,7 @@ it('shows the event detail', function () {
     $event = Event::factory()->create(['name' => 'Evento Detalle', 'venue' => 'Salón A']);
 
     actingRole(UserRole::Admin);
-        $this->get("/events/{$event->id}")
+    $this->get("/events/{$event->id}")
         ->assertOk()
         ->assertSee('Evento Detalle')
         ->assertSee('Salón A')
@@ -43,7 +42,7 @@ it('shows the event detail', function () {
 
 it('creates an event', function () {
     actingRole(UserRole::Admin);
-        $this->post('/events', validEventPayload())
+    $this->post('/events', validEventPayload())
         ->assertRedirect(route('events.index'));
 
     $event = Event::query()->where('name', 'Concierto UTTEC')->firstOrFail();
@@ -56,19 +55,19 @@ it('creates an event', function () {
 
 it('rejects an event without the required fields', function () {
     actingRole(UserRole::Admin);
-        $this->post('/events', [])
+    $this->post('/events', [])
         ->assertSessionHasErrors(['name', 'venue', 'starts_at', 'capacity', 'early_quantity']);
 });
 
 it('rejects an event with an invalid capacity', function () {
     actingRole(UserRole::Admin);
-        $this->post('/events', validEventPayload(['capacity' => 0]))
+    $this->post('/events', validEventPayload(['capacity' => 0]))
         ->assertSessionHasErrors('capacity');
 });
 
 it('rejects an early quantity bigger than the capacity', function () {
     actingRole(UserRole::Admin);
-        $this->post('/events', validEventPayload(['capacity' => 10, 'early_quantity' => 11]))
+    $this->post('/events', validEventPayload(['capacity' => 10, 'early_quantity' => 11]))
         ->assertSessionHasErrors('early_quantity');
 });
 
@@ -76,11 +75,11 @@ it('updates an event', function () {
     $event = Event::factory()->create(['name' => 'Antes', 'capacity' => 100]);
 
     actingRole(UserRole::Admin);
-        $this->put("/events/{$event->id}", validEventPayload([
-            'name' => 'Después',
-            'capacity' => 200,
-            'is_active' => '0',
-        ]))
+    $this->put("/events/{$event->id}", validEventPayload([
+        'name' => 'Después',
+        'capacity' => 200,
+        'is_active' => '0',
+    ]))
         ->assertRedirect(route('events.show', $event));
 
     $event->refresh();
@@ -114,7 +113,7 @@ it('blocks deleting an event with sales that has not finished', function () {
     Ticket::factory()->create(['event_id' => $event->id]);
 
     actingRole(UserRole::Admin);
-        $this->delete("/events/{$event->id}")
+    $this->delete("/events/{$event->id}")
         ->assertRedirect()
         ->assertSessionHasErrors();
 
@@ -125,19 +124,8 @@ it('deletes an event that already finished', function () {
     $event = Event::factory()->create(['starts_at' => now()->subDays(3)]);
 
     actingRole(UserRole::Admin);
-        $this->delete("/events/{$event->id}")
+    $this->delete("/events/{$event->id}")
         ->assertRedirect(route('events.index'));
 
     expect(Event::query()->whereKey($event->id)->exists())->toBeFalse();
 });
-
-it('hides the events from the seller and the manager', function (UserRole $role) {
-    $user = User::factory()->create(['role' => $role]);
-
-    $this->actingAs($user)->get('/events')->assertForbidden();
-    $this->actingAs($user)->get('/events/create')->assertForbidden();
-    $this->actingAs($user)->post('/events', validEventPayload())->assertForbidden();
-})->with([
-    'seller' => UserRole::Seller,
-    'manager' => UserRole::Manager,
-]);
