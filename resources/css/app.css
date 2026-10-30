@@ -1315,5 +1315,6 @@ pre code,
 
 /* Keep SweetAlert dialogs and toasts above the sticky header (z-99999) */
 .swal2-container {
-  z-index: 999999 !important;
+  position: fixed !important;
+  z-index: 2147483647 !important;
 }
