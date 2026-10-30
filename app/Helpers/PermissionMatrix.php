@@ -36,7 +36,7 @@ class PermissionMatrix
                     ['label' => 'Enviar boleto por correo', 'admin' => true, 'seller' => true, 'manager' => false],
                     ['label' => 'Cancelar boleto', 'admin' => true, 'seller' => false, 'manager' => false],
                     ['label' => 'Ver clientes cancelados', 'admin' => true, 'seller' => false, 'manager' => false],
-                    ['label' => 'Eliminar boleto', 'admin' => false, 'seller' => false, 'manager' => false],
+                    ['label' => 'Eliminar boletos y clientes con boleto asociado', 'admin' => true, 'seller' => false, 'manager' => false],
                 ],
             ],
             [
@@ -45,7 +45,7 @@ class PermissionMatrix
                     ['label' => 'Ver listado de usuarios', 'admin' => true, 'seller' => false, 'manager' => false],
                     ['label' => 'Crear usuarios', 'admin' => true, 'seller' => false, 'manager' => false],
                     ['label' => 'Editar usuarios', 'admin' => true, 'seller' => false, 'manager' => false],
-                    ['label' => 'Eliminar usuarios', 'admin' => false, 'seller' => false, 'manager' => false],
+                    ['label' => 'Eliminar usuarios sin ventas ni check-in', 'admin' => true, 'seller' => false, 'manager' => false],
                 ],
             ],
             [

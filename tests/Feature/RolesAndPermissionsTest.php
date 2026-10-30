@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\UserRole;
+use App\Helpers\PermissionMatrix;
 use App\Http\Controllers\TicketController;
 use App\Models\Event;
 use App\Models\Ticket;
@@ -43,6 +44,8 @@ it('lets only the admin manage users', function () {
     $this->get('/users/create')->assertOk();
     $user = User::factory()->create();
     $this->get("/users/{$user->id}/edit")->assertOk();
+    $deletableUser = User::factory()->create();
+    $this->delete("/users/{$deletableUser->id}")->assertRedirect(route('users.index'));
 
     actingRole(UserRole::Seller);
     $this->get('/users')->assertForbidden();
@@ -103,6 +106,27 @@ it('lets only the admin cancel a ticket', function () {
 
     actingRole(UserRole::Manager);
     $this->post("/tickets/{$other->id}/cancel")->assertForbidden();
+});
+
+it('lets the admin delete a ticket only when its user and client are associated', function () {
+    $ticket = Ticket::factory()->create();
+
+    actingRole(UserRole::Admin);
+    $this->delete(route('tickets.destroy', $ticket))
+        ->assertRedirect(route('tickets.cancelled'));
+
+    expect($ticket->fresh()->isCancelled())->toBeTrue();
+});
+
+it('shows delete permissions for administrators in the permissions matrix', function () {
+    $items = collect(PermissionMatrix::groups())
+        ->flatMap(fn (array $group) => $group['items'])
+        ->keyBy('label');
+
+    expect($items['Eliminar usuarios sin ventas ni check-in']['admin'])->toBeTrue()
+        ->and($items['Eliminar boletos y clientes con boleto asociado']['admin'])->toBeTrue()
+        ->and($items['Eliminar usuarios sin ventas ni check-in']['seller'])->toBeFalse()
+        ->and($items['Eliminar boletos y clientes con boleto asociado']['seller'])->toBeFalse();
 });
 
 it('lets the admin and the manager check in', function (UserRole $role) {

@@ -34,7 +34,10 @@ class TicketPolicy
 
     public function delete(User $user, Ticket $ticket): bool
     {
-        return false;
+        return $user->hasPermission(Permission::DeleteTickets)
+            && $ticket->seller()->exists()
+            && filled($ticket->buyer_name)
+            && filled($ticket->buyer_email);
     }
 
     public function send(User $user, Ticket $ticket): bool
