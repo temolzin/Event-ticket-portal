@@ -1312,3 +1312,8 @@ pre code,
   text-align: left !important;
   unicode-bidi: isolate;
 }
+
+/* Keep SweetAlert dialogs and toasts above the sticky header (z-99999) */
+.swal2-container {
+  z-index: 999999 !important;
+}
