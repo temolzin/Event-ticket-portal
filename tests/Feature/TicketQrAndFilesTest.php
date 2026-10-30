@@ -21,7 +21,7 @@ beforeEach(function () {
 
 function qrTicket(array $attributes = [], bool $withFiles = true, ?User $seller = null): Ticket
 {
-    $seller ??= actingRole(UserRole::Seller);
+    $seller ??= actingRole(UserRole::Admin);
     $event = Event::factory()->create(['is_active' => true]);
 
     $ticketType = TicketType::factory()->create([
@@ -48,7 +48,7 @@ function qrTicket(array $attributes = [], bool $withFiles = true, ?User $seller 
 }
 
 it('shows the qr code on the ticket detail', function () {
-    $seller = actingRole(UserRole::Seller);
+    $seller = actingRole(UserRole::Admin);
     $ticket = qrTicket(seller: $seller);
 
     $this->actingAs($seller)
@@ -59,7 +59,7 @@ it('shows the qr code on the ticket detail', function () {
 });
 
 it('renders the printable ticket with the qr code', function () {
-    $seller = actingRole(UserRole::Seller);
+    $seller = actingRole(UserRole::Admin);
     $ticket = qrTicket(seller: $seller);
 
     $this->actingAs($seller)
@@ -71,7 +71,7 @@ it('renders the printable ticket with the qr code', function () {
 });
 
 it('does not expose the ticket id in the printable ticket url', function () {
-    $seller = actingRole(UserRole::Seller);
+    $seller = actingRole(UserRole::Admin);
     $ticket = qrTicket(seller: $seller);
 
     $response = $this->actingAs($seller)
@@ -90,59 +90,11 @@ it('does not expose the ticket id in the printable ticket url', function () {
 });
 
 it('rejects an invalid encrypted printable ticket id', function () {
-    $seller = actingRole(UserRole::Seller);
+    $seller = actingRole(UserRole::Admin);
 
     $this->actingAs($seller)
         ->get(route('tickets.download', ['ticket' => 'invalid-token']))
         ->assertNotFound();
-});
-
-it('serves the buyer photo only to the seller and the admin', function () {
-    Storage::fake('local');
-
-    $seller = actingRole(UserRole::Seller);
-    $ticket = qrTicket(seller: $seller);
-
-    $response = $this->actingAs($seller)->get("/tickets/{$ticket->encryptedDownloadKey()}/photo");
-
-    $response->assertOk();
-
-    expect($response->headers->get('Cache-Control'))
-        ->toContain('private')
-        ->not->toContain('public');
-
-    $this->actingAs(User::factory()->create(['role' => UserRole::Admin]))
-        ->get("/tickets/{$ticket->encryptedDownloadKey()}/photo")
-        ->assertOk();
-});
-
-it('serves the payment receipt only to the seller and the admin', function () {
-    Storage::fake('local');
-
-    $seller = actingRole(UserRole::Seller);
-    $ticket = qrTicket(seller: $seller);
-
-    $response = $this->actingAs($seller)->get("/tickets/{$ticket->encryptedDownloadKey()}/receipt");
-
-    $response->assertOk();
-
-    expect($response->headers->get('Cache-Control'))
-        ->toContain('private')
-        ->not->toContain('public');
-});
-
-it('keeps a seller out of the files of a sale that belongs to someone else', function () {
-    Storage::fake('local');
-
-    $ticket = qrTicket(seller: actingRole(UserRole::Seller));
-
-    actingRole(UserRole::Seller);
-        $this->get("/tickets/{$ticket->encryptedDownloadKey()}/photo")
-        ->assertForbidden();
-
-    actingRole(UserRole::Seller);
-        $this->get("/tickets/{$ticket->encryptedDownloadKey()}/receipt")
-        ->assertForbidden();
 });
 
 it('keeps the manager out of the files', function () {
@@ -160,7 +112,7 @@ it('keeps the manager out of the files', function () {
 });
 
 it('answers with a not found when the file is missing', function () {
-    $seller = actingRole(UserRole::Seller);
+    $seller = actingRole(UserRole::Admin);
     $ticket = qrTicket(withFiles: false, seller: $seller);
 
     $this->actingAs($seller)
@@ -171,7 +123,7 @@ it('answers with a not found when the file is missing', function () {
 it('sends the ticket by email and marks it as sent', function () {
     Mail::fake();
 
-    $seller = actingRole(UserRole::Seller);
+    $seller = actingRole(UserRole::Admin);
     $ticket = qrTicket(seller: $seller);
 
     $this->actingAs($seller)
@@ -190,18 +142,6 @@ it('sends the ticket by email and marks it as sent', function () {
         ->and($ticket->fresh()->sent_at)->not->toBeNull();
 });
 
-it('does not let a seller send a ticket that belongs to someone else', function () {
-    Mail::fake();
-
-    $ticket = qrTicket();
-
-    actingRole(UserRole::Seller);
-        $this->post("/tickets/{$ticket->id}/send")
-        ->assertForbidden();
-
-    Mail::assertNothingSent();
-});
-
 it('keeps the manager out of the send action', function () {
     Mail::fake();
 
@@ -217,7 +157,7 @@ it('keeps the manager out of the send action', function () {
 it('does not let anyone send a cancelled ticket', function () {
     Mail::fake();
 
-    $seller = actingRole(UserRole::Seller);
+    $seller = actingRole(UserRole::Admin);
     $ticket = qrTicket(seller: $seller);
     $ticket->update(['status' => TicketStatus::Cancelled]);
 
@@ -231,7 +171,7 @@ it('does not let anyone send a cancelled ticket', function () {
 it('does not let anyone send a ticket that was already used', function () {
     Mail::fake();
 
-    $seller = actingRole(UserRole::Seller);
+    $seller = actingRole(UserRole::Admin);
     $ticket = qrTicket(seller: $seller);
     $ticket->update(['status' => TicketStatus::Used, 'checked_in_at' => now()]);
 
@@ -288,7 +228,7 @@ it('generates a png qr code that can be scanned', function () {
 });
 
 it('lets the buyer photo download as a file for the badge', function () {
-    $seller = actingRole(UserRole::Seller);
+    $seller = actingRole(UserRole::Admin);
     $ticket = qrTicket(seller: $seller);
 
     $response = $this->actingAs($seller)->get("/tickets/{$ticket->encryptedDownloadKey()}/photo/download");
@@ -302,7 +242,7 @@ it('lets the buyer photo download as a file for the badge', function () {
 });
 
 it('keeps the buyer photo visible inline when it is opened', function () {
-    $seller = actingRole(UserRole::Seller);
+    $seller = actingRole(UserRole::Admin);
     $ticket = qrTicket(seller: $seller);
 
     $response = $this->actingAs($seller)->get("/tickets/{$ticket->encryptedDownloadKey()}/photo");

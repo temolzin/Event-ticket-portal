@@ -48,7 +48,7 @@ it('registers a sale and stores the buyer data', function () {
     Storage::fake('local');
 
     [$event, $ticketType] = saleEventWithType();
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
+    $seller = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->actingAs($seller)
         ->post('/tickets', salePayload($event, $ticketType))
@@ -69,7 +69,7 @@ it('stores the buyer photo and the receipt on the private disk', function () {
     Storage::fake('local');
 
     [$event, $ticketType] = saleEventWithType();
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
+    $seller = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->actingAs($seller)
         ->post('/tickets', salePayload($event, $ticketType))
@@ -89,8 +89,8 @@ it('charges the early price while the event is in the early phase', function () 
 
     [$event, $ticketType] = saleEventWithType([], ['early_price' => 990, 'regular_price' => 1500]);
 
-    actingRole(UserRole::Seller);
-        $this->post('/tickets', salePayload($event, $ticketType))
+    actingRole(UserRole::Admin);
+    $this->post('/tickets', salePayload($event, $ticketType))
         ->assertRedirect();
 
     expect((float) Ticket::query()->firstOrFail()->price)->toBe(990.0);
@@ -104,8 +104,8 @@ it('charges the regular price once the early seats are gone', function () {
         ['early_price' => 990, 'regular_price' => 1500]
     );
 
-    actingRole(UserRole::Seller);
-        $this->post('/tickets', salePayload($event, $ticketType))
+    actingRole(UserRole::Admin);
+    $this->post('/tickets', salePayload($event, $ticketType))
         ->assertRedirect();
 
     expect((float) Ticket::query()->firstOrFail()->price)->toBe(1500.0);
@@ -116,8 +116,8 @@ it('charges the regular price for a type without an early price', function () {
 
     [$event, $ticketType] = saleEventWithType([], ['early_price' => null, 'regular_price' => 700]);
 
-    actingRole(UserRole::Seller);
-        $this->post('/tickets', salePayload($event, $ticketType))
+    actingRole(UserRole::Admin);
+    $this->post('/tickets', salePayload($event, $ticketType))
         ->assertRedirect();
 
     expect((float) Ticket::query()->firstOrFail()->price)->toBe(700.0);
@@ -133,8 +133,8 @@ it('rejects the sale when the event has no seats left', function () {
         'ticket_type_id' => $ticketType->id,
     ]);
 
-    actingRole(UserRole::Seller);
-        $this->post('/tickets', salePayload($event, $ticketType))
+    actingRole(UserRole::Admin);
+    $this->post('/tickets', salePayload($event, $ticketType))
         ->assertSessionHasErrors('event_id');
 
     expect(Ticket::query()->count())->toBe(1);
@@ -149,8 +149,8 @@ it('rejects a duo ticket when only one seat remains', function () {
         'seats_per_ticket' => 2,
     ]);
 
-    actingRole(UserRole::Seller);
-        $this->post('/tickets', salePayload($event, $ticketType))
+    actingRole(UserRole::Admin);
+    $this->post('/tickets', salePayload($event, $ticketType))
         ->assertSessionHasErrors('event_id');
 
     expect(Ticket::query()->count())->toBe(0);
@@ -174,13 +174,13 @@ it('frees the seat when a ticket is cancelled', function () {
 it('rejects a sale without a buyer name, an email or the files', function () {
     [$event, $ticketType] = saleEventWithType();
 
-    actingRole(UserRole::Seller);
-        $this->post('/tickets', [
-            'event_id' => $event->id,
-            'ticket_type_id' => $ticketType->id,
-            'buyer_name' => '',
-            'buyer_email' => '',
-        ])
+    actingRole(UserRole::Admin);
+    $this->post('/tickets', [
+        'event_id' => $event->id,
+        'ticket_type_id' => $ticketType->id,
+        'buyer_name' => '',
+        'buyer_email' => '',
+    ])
         ->assertSessionHasErrors(['buyer_name', 'buyer_email', 'buyer_photo', 'payment_receipt']);
 });
 
@@ -189,33 +189,19 @@ it('rejects a sale on an inactive event or an inactive type', function () {
 
     [$event, $ticketType] = saleEventWithType(['is_active' => false]);
 
-    actingRole(UserRole::Seller);
-        $this->post('/tickets', salePayload($event, $ticketType))
+    actingRole(UserRole::Admin);
+    $this->post('/tickets', salePayload($event, $ticketType))
         ->assertSessionHasErrors('event_id');
 
     [$activeEvent, $inactiveType] = saleEventWithType([], ['is_active' => false]);
 
-    actingRole(UserRole::Seller);
-        $this->post('/tickets', salePayload($activeEvent, $inactiveType))
+    actingRole(UserRole::Admin);
+    $this->post('/tickets', salePayload($activeEvent, $inactiveType))
         ->assertSessionHasErrors('ticket_type_id');
 });
 
-it('lists only the sales of the seller who registered them', function () {
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
-    $otherSeller = User::factory()->create(['role' => UserRole::Seller]);
-
-    Ticket::factory()->create(['seller_id' => $seller->id, 'buyer_name' => 'Compra Propia']);
-    Ticket::factory()->create(['seller_id' => $otherSeller->id, 'buyer_name' => 'Compra Ajena']);
-
-    $this->actingAs($seller)
-        ->get('/tickets')
-        ->assertOk()
-        ->assertSee('Compra Propia')
-        ->assertDontSee('Compra Ajena');
-});
-
 it('shows every sale to the admin', function () {
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
+    $seller = User::factory()->create(['role' => UserRole::Admin]);
 
     Ticket::factory()->create(['seller_id' => $seller->id, 'buyer_name' => 'Compra Del Vendedor']);
 
@@ -226,7 +212,7 @@ it('shows every sale to the admin', function () {
 });
 
 it('groups the clients by event', function () {
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
+    $seller = User::factory()->create(['role' => UserRole::Admin]);
     $firstEvent = Event::factory()->create(['name' => 'Evento Uno']);
     $secondEvent = Event::factory()->create(['name' => 'Evento Dos']);
 
@@ -250,7 +236,7 @@ it('groups the clients by event', function () {
 });
 
 it('shows the count of clients per event', function () {
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
+    $seller = User::factory()->create(['role' => UserRole::Admin]);
     $event = Event::factory()->create(['name' => 'Evento Con Tres']);
 
     Ticket::factory()->count(3)->create([
@@ -264,39 +250,8 @@ it('shows the count of clients per event', function () {
         ->assertSee('3 clientes registrados');
 });
 
-it('allows the seller to edit their customer details without changing ticket data', function () {
-    Storage::fake('local');
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
-    $ticket = Ticket::factory()->create([
-        'seller_id' => $seller->id,
-        'buyer_name' => 'Ana López',
-        'buyer_email' => 'ana@ejemplo.com',
-        'status' => TicketStatus::Sent,
-        'sent_at' => now(),
-    ]);
-
-    $this->actingAs($seller)
-        ->get(route('tickets.edit', $ticket))
-        ->assertOk()
-        ->assertSee('Ana López')
-        ->assertSee('Editar cliente')
-        ->assertSee('href="'.route('tickets.index').'"', false)
-        ->assertSee('href="'.route('tickets.show', $ticket).'"', false);
-
-    $this->put(route('tickets.update', $ticket), [
-        'buyer_name' => 'Andrea López',
-        'buyer_email' => 'ANDREA@EJEMPLO.COM',
-    ])
-        ->assertRedirect(route('tickets.show', $ticket));
-
-    expect($ticket->fresh()->buyer_name)->toBe('Andrea López')
-        ->and($ticket->fresh()->buyer_email)->toBe('andrea@ejemplo.com')
-        ->and($ticket->fresh()->status)->toBe(TicketStatus::Sent)
-        ->and($ticket->fresh()->code)->toBe($ticket->code);
-});
-
 it('warns when a customer name or email matches a cancelled client', function () {
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
+    $seller = User::factory()->create(['role' => UserRole::Admin]);
     Ticket::factory()->create([
         'status' => TicketStatus::Cancelled,
         'buyer_name' => 'Ana López',
@@ -334,7 +289,7 @@ it('warns when a customer name or email matches a cancelled client', function ()
 it('requires confirmation before registering a customer from the cancelled list', function () {
     Storage::fake('local');
     [$event, $ticketType] = saleEventWithType();
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
+    $seller = User::factory()->create(['role' => UserRole::Admin]);
     Ticket::factory()->create([
         'status' => TicketStatus::Cancelled,
         'event_id' => $event->id,
@@ -357,7 +312,7 @@ it('requires confirmation before registering a customer from the cancelled list'
 
 it('replaces optional customer files and removes the previous private files', function () {
     Storage::fake('local');
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
+    $seller = User::factory()->create(['role' => UserRole::Admin]);
     $ticket = Ticket::factory()->create(['seller_id' => $seller->id]);
     $ticket->storeBuyerPhoto(UploadedFile::fake()->image('old-photo.jpg'));
     $ticket->storePaymentReceipt(UploadedFile::fake()->image('old-receipt.jpg'));
@@ -382,27 +337,6 @@ it('replaces optional customer files and removes the previous private files', fu
     Storage::disk('local')->assertMissing($oldReceipt);
     Storage::disk('local')->assertExists($updated->buyer_photo_path);
     Storage::disk('local')->assertExists($updated->payment_receipt_path);
-});
-
-it('prevents sellers from editing another sellers customer and blocks used or cancelled tickets', function () {
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
-    $otherSellerTicket = Ticket::factory()->create(['seller_id' => User::factory()->create(['role' => UserRole::Seller])->id]);
-    $usedTicket = Ticket::factory()->create([
-        'seller_id' => $seller->id,
-        'status' => TicketStatus::Used,
-        'checked_in_at' => now(),
-    ]);
-    $cancelledTicket = Ticket::factory()->create([
-        'seller_id' => $seller->id,
-        'status' => TicketStatus::Cancelled,
-    ]);
-
-    $this->actingAs($seller)
-        ->get(route('tickets.edit', $otherSellerTicket))
-        ->assertForbidden();
-
-    $this->get(route('tickets.edit', $usedTicket))->assertForbidden();
-    $this->get(route('tickets.edit', $cancelledTicket))->assertForbidden();
 });
 
 it('moves a cancelled customer out of the active module and into cancelled clients', function () {
@@ -454,7 +388,7 @@ it('groups cancelled tickets by event', function () {
 });
 
 it('leaves out an event with no sales', function () {
-    $seller = User::factory()->create(['role' => UserRole::Seller]);
+    $seller = User::factory()->create(['role' => UserRole::Admin]);
     Event::factory()->create(['name' => 'Evento Sin Ventas']);
 
     $this->actingAs($seller)
@@ -463,18 +397,10 @@ it('leaves out an event with no sales', function () {
         ->assertDontSee('Evento Sin Ventas');
 });
 
-it('keeps the seller out of a sale that belongs to someone else', function () {
-    $ticket = Ticket::factory()->create();
-
-    actingRole(UserRole::Seller);
-        $this->get("/tickets/{$ticket->id}")
-        ->assertForbidden();
-});
-
 it('shows the ticket types of the event with the price of the phase', function () {
     [$event, $ticketType] = saleEventWithType();
 
-    actingRole(UserRole::Seller);
+    actingRole(UserRole::Admin);
     $response = $this->get("/tickets/events/{$event->id}/types")
         ->assertOk();
 

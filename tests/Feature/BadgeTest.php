@@ -28,20 +28,6 @@ function createBadgeTicket(User $seller, Event $event, array $attributes = []): 
     ]);
 }
 
-it('lists only events with active tickets the current seller can access', function () {
-    $seller = actingRole(UserRole::Seller);
-    $event = Event::factory()->create(['name' => 'My Badge Event']);
-    createBadgeTicket($seller, $event);
-    $otherEvent = Event::factory()->create(['name' => 'Other Seller Event']);
-    createBadgeTicket(actingRole(UserRole::Seller), $otherEvent);
-
-    $this->actingAs($seller)
-        ->get(route('badges.index'))
-        ->assertOk()
-        ->assertSee('My Badge Event')
-        ->assertDontSee('Other Seller Event');
-});
-
 it('prints every active event badge and excludes cancelled tickets', function () {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
     $event = Event::factory()->create(['name' => 'Badge Print Event']);
@@ -145,7 +131,7 @@ it('keeps every badge front and back paired without forcing separate sheets', fu
 });
 
 it('prints only the selected badges for an event', function () {
-    $seller = actingRole(UserRole::Seller);
+    $seller = actingRole(UserRole::Admin);
     $event = Event::factory()->create();
     $selectedTicket = createBadgeTicket($seller, $event, ['buyer_name' => 'Selected Client']);
     createBadgeTicket($seller, $event, ['buyer_name' => 'Unselected Client']);
@@ -157,37 +143,6 @@ it('prints only the selected badges for an event', function () {
         ->assertOk()
         ->assertSee('Selected Client')
         ->assertDontSee('Unselected Client');
-});
-
-it('prints an individual badge for its seller and admin only', function () {
-    $seller = actingRole(UserRole::Seller);
-    $ticket = createBadgeTicket($seller, Event::factory()->create());
-
-    $this->actingAs($seller)
-        ->get(route('badges.tickets.print', $ticket->encryptedDownloadKey()))
-        ->assertOk()
-        ->assertSee($ticket->buyer_name)
-        ->assertSee(asset('images/badges/company-logo.png'), false);
-
-    actingRole(UserRole::Seller);
-        $this->get(route('badges.tickets.print', $ticket->encryptedDownloadKey()))
-        ->assertForbidden();
-
-    $this->actingAs(User::factory()->create(['role' => UserRole::Admin]))
-        ->get(route('badges.tickets.print', $ticket->encryptedDownloadKey()))
-        ->assertOk();
-});
-
-it('rejects selected tickets outside the seller event scope', function () {
-    $seller = actingRole(UserRole::Seller);
-    $event = Event::factory()->create();
-    $foreignTicket = createBadgeTicket(actingRole(UserRole::Seller), $event);
-
-    $this->actingAs($seller)
-        ->post(route('badges.events.print-selected', $event), [
-            'ticket_ids' => [$foreignTicket->id],
-        ])
-        ->assertNotFound();
 });
 
 it('blocks managers from the badge module', function () {

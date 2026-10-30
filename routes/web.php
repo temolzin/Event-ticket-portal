@@ -68,7 +68,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     });
 
-    Route::middleware('role:admin,seller')->group(function () {
+    Route::middleware('role:admin')->group(function () {
         Route::get('/badges', [BadgeController::class, 'index'])->name('badges.index');
         Route::get('/badges/events/{event}', [BadgeController::class, 'showEvent'])->name('badges.events.show');
         Route::get('/badges/events/{event}/print', [BadgeController::class, 'printAll'])->name('badges.events.print');

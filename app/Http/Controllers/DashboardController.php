@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ScanResult;
-use App\Enums\TicketStatus;
 use App\Enums\UserRole;
 use App\Models\Event;
 use App\Models\Scan;
@@ -28,10 +27,7 @@ class DashboardController extends Controller
             'events' => $this->buildEventCards($viewer),
             'activity' => $this->getRecentActivity($viewer),
             'primaryAction' => $this->buildPrimaryAction($viewer->role),
-            'activityTitle' => $viewer->isSeller()
-                ? __('Recent ticket sales')
-                : __('Recent check-in activity'),
-            'isSeller' => $viewer->isSeller(),
+            'activityTitle' => __('Recent check-in activity'),
         ]);
     }
 
@@ -87,13 +83,6 @@ class DashboardController extends Controller
                 'tickets as checked_in_tickets_count' => fn (Builder $ticketQuery) => $ticketQuery
                     ->active()
                     ->whereNotNull('checked_in_at'),
-                'tickets as viewer_sold_tickets_count' => fn (Builder $ticketQuery) => $ticketQuery
-                    ->active()
-                    ->where('seller_id', $viewer->id),
-                'tickets as viewer_sent_tickets_count' => fn (Builder $ticketQuery) => $ticketQuery
-                    ->active()
-                    ->where('seller_id', $viewer->id)
-                    ->whereNotNull('sent_at'),
             ])
             ->orderBy('starts_at')
             ->limit(6)
@@ -152,20 +141,6 @@ class DashboardController extends Controller
                     'tone' => 'error',
                 ],
             ]),
-            UserRole::Seller => array_merge($commonMetrics, [
-                [
-                    'key' => 'your-sales',
-                    'label' => __('Your tickets sold'),
-                    'value' => $event->viewer_sold_tickets_count,
-                    'tone' => 'blue',
-                ],
-                [
-                    'key' => 'tickets-sent',
-                    'label' => __('Tickets sent'),
-                    'value' => $event->viewer_sent_tickets_count,
-                    'tone' => 'warning',
-                ],
-            ]),
         };
     }
 
@@ -175,10 +150,6 @@ class DashboardController extends Controller
             UserRole::Admin => [
                 'label' => __('Manage event'),
                 'url' => route('events.show', $event),
-            ],
-            UserRole::Seller => [
-                'label' => __('Register a sale'),
-                'url' => route('tickets.create'),
             ],
             UserRole::Manager => [
                 'label' => __('Open check-in'),
@@ -194,10 +165,6 @@ class DashboardController extends Controller
                 'label' => __('Create event'),
                 'url' => route('events.create'),
             ],
-            UserRole::Seller => [
-                'label' => __('Register a sale'),
-                'url' => route('tickets.create'),
-            ],
             UserRole::Manager => [
                 'label' => __('Open check-in'),
                 'url' => route('check-in.scan'),
@@ -207,35 +174,7 @@ class DashboardController extends Controller
 
     private function getRecentActivity(User $viewer): Collection
     {
-        return match ($viewer->role) {
-            UserRole::Seller => $this->getRecentSales($viewer),
-            default => $this->getRecentScans($viewer),
-        };
-    }
-
-    private function getRecentSales(User $seller): Collection
-    {
-        return $this->getActiveTicketsQuery()
-            ->where('seller_id', $seller->id)
-            ->with('event')
-            ->latest()
-            ->limit(8)
-            ->get()
-            ->map(fn (Ticket $ticket) => [
-                'eventGroup' => $ticket->event_id,
-                'event' => $ticket->event->name,
-                'detail' => __('Ticket sale'),
-                'reference' => $ticket->code,
-                'status' => __($ticket->status->describe()),
-                'tone' => match ($ticket->status) {
-                    TicketStatus::Used => 'success',
-                    TicketStatus::Sent => 'blue',
-                    default => 'warning',
-                },
-                'actor' => $ticket->buyer_name,
-                'occurredAt' => $ticket->created_at,
-                'url' => route('tickets.show', $ticket),
-            ]);
+        return $this->getRecentScans($viewer);
     }
 
     private function getRecentScans(User $viewer): Collection
